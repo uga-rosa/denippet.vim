@@ -171,13 +171,12 @@ export class Text extends Node {
   type: "text" = "text";
 
   constructor(
-    public raw: string,
-    public esc: string,
+    public text: string,
   ) {
     super();
   }
 
   getText(): string {
-    return this.esc;
+    return this.text;
   }
 }

@@ -30,7 +30,7 @@ const NonZeroInt = G.map(G.pattern("[1-9][0-9]*"), (value) => Number(value));
 const Text = (targets: string[], specials: string[]) =>
   G.map(
     G.takeUntil(targets, specials),
-    (value) => new N.Text(value.raw, value.esc),
+    (value) => new N.Text(value.esc),
   );
 
 const anyWithoutText: G.Parser<
@@ -196,7 +196,7 @@ const Choice = G.map(
     G.many(
       G.map(
         G.seq(Text([",", "|"], []), G.opt(Comma)),
-        (values) => values[0].esc,
+        (values) => values[0].text,
       ),
     ),
     Pipe,
