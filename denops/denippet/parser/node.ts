@@ -19,9 +19,12 @@ export type FormatModifier =
   | "camelcase"
   | "pascalcase";
 
-// 0-indexed, utf-16 offset
+function splitLines(text: string): string[] {
+  return text.replaceAll(/\r\n?/g, "\n").split("\n");
+}
+
 function calcRange(start: LSP.Position, text: string): LSP.Range {
-  const lines = text.replaceAll(/\r\n?/g, "\n").split("\n");
+  const lines = splitLines(text);
   const endLine = start.line + lines.length - 1;
   const endCharacter = lines.length > 1
     ? lines[lines.length - 1].length
@@ -40,6 +43,7 @@ function isSameRange(a: LSP.Range, b: LSP.Range): boolean {
 export abstract class Node {
   abstract type: NodeType;
   abstract denops: Denops;
+  /** 0-indexed, utf-16 offset, end-exclusive */
   range?: LSP.Range;
 
   isJumpable(): this is Jumpable {
@@ -50,13 +54,15 @@ export abstract class Node {
     return "";
   }
 
-  /** 0-indexed, utf-16 offset */
+  /**
+   * Update this.range and return the position of end of range.
+   * If text is changed, update also the buffer.
+   */
   async updateRange(start: LSP.Position): Promise<LSP.Position> {
     const text = this.getText();
     const newRange = calcRange(start, text);
     if (this.range && !isSameRange(this.range, newRange)) {
-      const text = this.getText();
-      const replacement = text.replaceAll(/\r\n?/g, "\n").split("\n");
+      const replacement = splitLines(this.getText());
       await lsputil.setText(this.denops, 0, this.range, replacement);
     }
     this.range = newRange;
@@ -136,6 +142,7 @@ export abstract class Jumpable extends Node {
     }
     const range8 = lsputil.createRange(row, col, end_row, end_col);
     const range16 = await lsputil.toUtf16Range(this.denops, 0, range8, "utf-8");
+    this.range = range16;
     const lines = await lsputil.getText(
       this.denops,
       0,
