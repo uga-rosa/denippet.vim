@@ -1,3 +1,5 @@
+import { Denops } from "../deps.ts";
+
 type ParserResult<T = unknown> = {
   parsed: true;
   value: T;
@@ -8,9 +10,13 @@ type ParserResult<T = unknown> = {
   pos: number;
 };
 
-export type Parser<T> = (input: string, pos: number) => ParserResult<T>;
+export type Parser<T> = (
+  input: string,
+  pos: number,
+  denops: Denops,
+) => ParserResult<T>;
 
-type ParserMapFn<T, U> = (value: T) => U;
+type ParserMapFn<T, U> = (value: T, denops: Denops) => U;
 
 type TupleParsers<T extends unknown[]> = { [K in keyof T]: Parser<T[K]> };
 
@@ -76,12 +82,12 @@ export function map<T, U>(
   parser: Parser<T>,
   mapFn: ParserMapFn<T, U>,
 ): Parser<U> {
-  return (input, pos) => {
-    const result = parser(input, pos);
+  return (input, pos, denops) => {
+    const result = parser(input, pos, denops);
     if (result.parsed) {
       return {
         parsed: true,
-        value: mapFn(result.value!),
+        value: mapFn(result.value, denops),
         pos: result.pos,
       };
     } else {
@@ -91,8 +97,8 @@ export function map<T, U>(
 }
 
 export function lazy<T>(factory: () => Parser<T>): Parser<T> {
-  return (input, pos) => {
-    return factory()(input, pos);
+  return (input, pos, denops) => {
+    return factory()(input, pos, denops);
   };
 }
 
@@ -126,18 +132,18 @@ export function pattern(p: string): Parser<string> {
 }
 
 export function many<T>(parser: Parser<T>): Parser<T[]> {
-  return (input, pos) => {
+  return (input, pos, denops) => {
     const values: T[] = [];
     let new_pos = pos;
 
     while (new_pos < input.length) {
-      const result = parser(input, new_pos);
+      const result = parser(input, new_pos, denops);
 
       if (!result.parsed) {
         break;
       }
 
-      values.push(result.value!);
+      values.push(result.value);
       new_pos = result.pos;
     }
 
@@ -154,8 +160,8 @@ export function many<T>(parser: Parser<T>): Parser<T[]> {
 }
 
 export function opt<T>(parser: Parser<T>): Parser<T | undefined> {
-  return (input, pos) => {
-    const result = parser(input, pos);
+  return (input, pos, denops) => {
+    const result = parser(input, pos, denops);
     return {
       parsed: true,
       value: result.value,
@@ -167,9 +173,9 @@ export function opt<T>(parser: Parser<T>): Parser<T | undefined> {
 export function or<T extends unknown[]>(
   ...parsers: TupleParsers<T>
 ): Parser<T[number]> {
-  return (input, pos) => {
+  return (input, pos, denops) => {
     for (const parser of parsers) {
-      const result = parser(input, pos);
+      const result = parser(input, pos, denops);
       if (result.parsed) {
         return result;
       }
@@ -182,14 +188,14 @@ export function or<T extends unknown[]>(
 export function seq<T extends unknown[]>(
   ...parsers: TupleParsers<T>
 ): Parser<T> {
-  return (input, pos) => {
+  return (input, pos, denops) => {
     const values: unknown[] = [];
     let new_pos = pos;
 
     for (const parser of parsers) {
-      const result = parser(input, new_pos);
+      const result = parser(input, new_pos, denops);
       if (result.parsed) {
-        values.push(result.value!);
+        values.push(result.value);
         new_pos = result.pos;
       } else {
         return unmatch(pos);

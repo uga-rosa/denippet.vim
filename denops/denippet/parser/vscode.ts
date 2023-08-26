@@ -30,7 +30,7 @@ const NonZeroInt = G.map(G.pattern("[1-9][0-9]*"), (value) => Number(value));
 const Text = (targets: string[], specials: string[]) =>
   G.map(
     G.takeUntil(targets, specials),
-    (value) => new N.Text(value.esc),
+    (value, denops) => new N.Text(denops, value.esc),
   );
 
 const anyWithoutText: G.Parser<
@@ -46,7 +46,7 @@ const Format = G.or(
       Dollar,
       NonZeroInt,
     ),
-    (values) => new N.Format(Number(values[1])),
+    (values, denops) => new N.Format(denops, values[1]),
   ),
   G.map(
     G.seq(
@@ -55,7 +55,7 @@ const Format = G.or(
       NonZeroInt,
       Close,
     ),
-    (values) => new N.Format(values[2]),
+    (values, denops) => new N.Format(denops, values[2]),
   ),
   G.map(
     G.seq(
@@ -73,7 +73,7 @@ const Format = G.or(
       ),
       Close,
     ),
-    (values) => new N.Format(values[2], values[5]),
+    (values, denops) => new N.Format(denops, values[2], values[5]),
   ),
   G.map(
     G.seq(
@@ -85,8 +85,9 @@ const Format = G.or(
       G.opt(G.takeUntil(["}"], ["\\"])),
       Close,
     ),
-    (values) =>
+    (values, denops) =>
       new N.Format(
+        denops,
         values[2],
         undefined,
         values[5]?.esc,
@@ -106,8 +107,9 @@ const Format = G.or(
       ),
       Close,
     ),
-    (values) =>
+    (values, denops) =>
       new N.Format(
+        denops,
         values[2],
         undefined,
         values[4][1]?.esc,
@@ -124,8 +126,9 @@ const Format = G.or(
       G.opt(G.takeUntil(["}"], ["\\"])),
       Close,
     ),
-    (values) =>
+    (values, denops) =>
       new N.Format(
+        denops,
         values[2],
         undefined,
         undefined,
@@ -143,7 +146,8 @@ const Transform = G.map(
     Slash,
     G.opt(G.pattern("[ig]+")),
   ),
-  (values) => new N.Transform(values[1].raw, values[3], values[5]),
+  (values, denops) =>
+    new N.Transform(denops, values[1].raw, values[3], values[5]),
 );
 
 const Tabstop = G.or(
@@ -152,7 +156,7 @@ const Tabstop = G.or(
       Dollar,
       Int,
     ),
-    (values) => new N.Tabstop(values[1]),
+    (values, denops) => new N.Tabstop(denops, values[1]),
   ),
   G.map(
     G.seq(
@@ -161,7 +165,7 @@ const Tabstop = G.or(
       Int,
       Close,
     ),
-    (values) => new N.Tabstop(values[2]),
+    (values, denops) => new N.Tabstop(denops, values[2]),
   ),
   G.map(
     G.seq(
@@ -171,7 +175,7 @@ const Tabstop = G.or(
       Transform,
       Close,
     ),
-    (values) => new N.Tabstop(values[2], values[3]),
+    (values, denops) => new N.Tabstop(denops, values[2], values[3]),
   ),
 );
 
@@ -184,7 +188,7 @@ const Placeholder = G.map(
     G.opt(G.many(G.or(anyWithoutText, Text(["$", "}"], ["\\"])))),
     Close,
   ),
-  (values) => new N.Placeholder(values[2], values[4] ?? []),
+  (values, denops) => new N.Placeholder(denops, values[2], values[4] ?? []),
 );
 
 const Choice = G.map(
@@ -202,7 +206,7 @@ const Choice = G.map(
     Pipe,
     Close,
   ),
-  (values) => new N.Choice(values[2], values[4]),
+  (values, denops) => new N.Choice(denops, values[2], values[4]),
 );
 
 const Variable = G.or(
@@ -211,7 +215,7 @@ const Variable = G.or(
       Dollar,
       Var,
     ),
-    (values) => new N.Variable(values[1]),
+    (values, denops) => new N.Variable(denops, values[1]),
   ),
   G.map(
     G.seq(
@@ -220,7 +224,7 @@ const Variable = G.or(
       Var,
       Close,
     ),
-    (values) => new N.Variable(values[2]),
+    (values, denops) => new N.Variable(denops, values[2]),
   ),
   G.map(
     G.seq(
@@ -230,7 +234,7 @@ const Variable = G.or(
       Transform,
       Close,
     ),
-    (values) => new N.Variable(values[2], values[3]),
+    (values, denops) => new N.Variable(denops, values[2], values[3]),
   ),
   G.map(
     G.seq(
@@ -241,11 +245,11 @@ const Variable = G.or(
       G.many(G.or(anyWithoutText, Text(["$", "}"], ["\\"]))),
       Close,
     ),
-    (values) => new N.Variable(values[2], undefined, values[4]),
+    (values, denops) => new N.Variable(denops, values[2], undefined, values[4]),
   ),
 );
 
 export const Snippet = G.map(
   G.many(G.or(anyWithoutText, Text(["$"], ["}", "\\"]))),
-  (values) => new N.Snippet(values),
+  (values, denops) => new N.Snippet(values, denops),
 );
