@@ -56,7 +56,14 @@ export class Session {
 
     // Sort in ascending order by tabstop.
     const jumpableNodes = [...jumpableNodeMap.entries()]
-      .sort((a, b) => a[0] - b[0])
+      .sort((a, b) => {
+        if (a[0] === 0) {
+          return 1;
+        } else if (b[0] === 0) {
+          return -1;
+        }
+        return a[0] - b[0];
+      })
       .map((entry) => entry[1]);
 
     // Set the text to the buffer
