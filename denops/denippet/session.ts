@@ -93,4 +93,21 @@ export class Session {
     await this.currentNode().updateInput();
     this.snippet.updateRange();
   }
+
+  async jump(dir: 1 | -1): Promise<void> {
+    if (dir === 1) {
+      if (this.nodeIndex >= this.jumpableNodes.length - 1) {
+        this.nodeIndex = this.jumpableNodes.length - 1;
+        return;
+      }
+      this.nodeIndex++;
+    } else {
+      if (this.nodeIndex <= 0) {
+        this.nodeIndex = 0;
+        return;
+      }
+      this.nodeIndex--;
+    }
+    await this.currentNode().jump();
+  }
 }
