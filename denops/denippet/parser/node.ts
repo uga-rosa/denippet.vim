@@ -1,4 +1,5 @@
 import { api, camelcase, Denops, LSP, lsputil } from "../deps.ts";
+// import * as V from "../variable.ts";
 
 export const NAMESPACE = "denippet_jumpable_node";
 
@@ -185,9 +186,8 @@ export abstract class Jumpable extends Node {
       await lsputil.setCursor(this.denops, range.start);
       return;
     }
-    await this.denops.cmd("stopinsert");
     const range8 = await lsputil.toUtf8Range(this.denops, 0, range, "utf-16");
-    await this.denops.call("denippet#select", range8);
+    await this.denops.call("denippet#internal#select", range8);
   }
 }
 
@@ -279,15 +279,13 @@ export class Choice extends Jumpable {
   }
 
   selectNext(): void {
-    this.index++;
-    if (this.index >= this.items.length) {
+    if (++this.index >= this.items.length) {
       this.index = 0;
     }
   }
 
   selectPrev(): void {
-    this.index--;
-    if (this.index < 0) {
+    if (--this.index < 0) {
       this.index = this.items.length - 1;
     }
   }
@@ -312,6 +310,7 @@ export class Variable extends Node {
 
   getText(): string {
     // TODO
+    // const text = V[this.name]?.();
     return "";
   }
 }
