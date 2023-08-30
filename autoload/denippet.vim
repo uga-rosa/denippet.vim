@@ -1,16 +1,30 @@
-" original code is from vim-vsnip
-" https://github.com/hrsh7th/vim-vsnip/blob/7753ba9c10429c29d25abfd11b4c60b76718c438/autoload/vsnip/session.vim#L133-L149
-" Copyright (c) 2019 hrsh7th
-function denippet#select(range) abort
-  const start = a:range.start
-  const end = a:range.end
-  let cmd = ''
-  let cmd .= "\<Cmd>set virtualedit=onemore\<CR>"
-  let cmd .= mode()[0] ==# 'i' ? "\<Esc>" : ''
-  let cmd .= printf("\<Cmd>call cursor(%s, %s)\<CR>", start[0], start[1])
-  let cmd .= 'v'
-  let cmd .= printf("\<Cmd>call cursor(%s, %s)\<CR>%s", end[0], end[1], &selection ==# 'exclusive' ? '' : 'h')
-  let cmd .= printf("\<Cmd>set virtualedit=%s\<CR>", &virtualedit)
-  let cmd .= "\<C-g>"
-  call feedkeys(cmd, 'ni')
+function denippet#load(filepath, ...) abort
+  const filetype = a:0 ? a:1 : filepath->fnamemodify(":t:r")
+  call denops#plugin#wait_async('denippet', {
+        \ -> denops#notify('denippet', 'load', a:filepath, filetype)
+        \})
+endfunction
+
+function denippet#expandable() abort
+  return denops#request('denippet', 'expandable')
+endfunction
+
+function denippet#expand() abort
+  call denops#request('denippet', 'expand')
+endfunction
+
+function denippet#jumpable() abort
+  return denops#request('denippet', 'jumpable')
+endfunction
+
+function denippet#jump(dir) abort
+  call denops#request('denippet', 'jump', a:dir)
+endfunction
+
+function denippet#choosable() abort
+  return denops#request('denippet', 'choosable')
+endfunction
+
+function denippet#choice(dir) abort
+  call denops#request('denippet', 'choice', a:dir)
 endfunction
