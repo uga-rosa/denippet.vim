@@ -110,4 +110,21 @@ export class Session {
     }
     await this.currentNode().jump();
   }
+
+  async selectChoice(dir: 1 | -1): Promise<void> {
+    const node = this.currentNode();
+    if (!isChoiceNode(node)) {
+      return;
+    }
+    if (dir === 1) {
+      node.selectNext();
+    } else {
+      node.selectPrev();
+    }
+    await this.snippet.updateRange();
+  }
+}
+
+function isChoiceNode(node: Node.Jumpable): node is Node.Choice {
+  return node.type === "choice";
 }
