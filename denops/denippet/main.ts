@@ -1,10 +1,10 @@
 import { Denops, lsputil, op, u } from "./deps.ts";
-import { getSnippets, load, Snippet } from "./loader.ts";
+import { getSnippets, load, NormalizedSnippet } from "./loader.ts";
 import { Session } from "./session.ts";
 
 type SearchResult = {
   prefix: string;
-  body: Snippet["body"];
+  body: NormalizedSnippet["body"];
 } | {
   prefix?: undefined;
   body?: undefined;

@@ -42,7 +42,7 @@ function assertTSSnippet(x: unknown): asserts x is Record<string, TSSnippet> {
   );
 }
 
-export type Snippet = {
+export type NormalizedSnippet = {
   name: string;
   prefix: string[];
   body: string | ((denops: Denops) => Promise<string>);
@@ -50,11 +50,11 @@ export type Snippet = {
 };
 
 // Keys are filetypes
-const Cell: Record<string, Snippet[]> = {};
+const Cell: Record<string, NormalizedSnippet[]> = {};
 
 function setSnippets(
   filetype: string | string[],
-  snippets: Snippet[],
+  snippets: NormalizedSnippet[],
 ): void {
   toArray(filetype).forEach((ft) => {
     if (Cell[ft] === undefined) {
@@ -64,7 +64,7 @@ function setSnippets(
   });
 }
 
-export function getSnippets(ft: string): Snippet[] {
+export function getSnippets(ft: string): NormalizedSnippet[] {
   return Cell[ft] ?? [];
 }
 
@@ -73,7 +73,7 @@ export async function load(
   filetype: string | string[],
 ): Promise<void> {
   const extension = filepath.split(".").pop()!;
-  let snippets: Snippet[] = [];
+  let snippets: NormalizedSnippet[] = [];
   if (["json", "toml", "yaml"].includes(extension)) {
     const raw = await Deno.readTextFile(filepath);
     const content = extension === "json"
