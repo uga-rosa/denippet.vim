@@ -66,6 +66,8 @@ export class Session {
       })
       .map((entry) => entry[1]);
 
+    // Store the cursor position before do linePatch
+    const cursor = await lsputil.getCursor(denops);
     // Set the text to the buffer
     const insertText = snippet.getText();
     await lsputil.linePatch(denops, 0, 0, insertText);
@@ -76,13 +78,15 @@ export class Session {
     }
 
     // Calculate range each node
-    const cursor = await lsputil.getCursor(denops);
-    snippet.updateRange(cursor);
+    await snippet.updateRange(cursor);
 
+    // Jump to the first node
+    await jumpableNodes[0].jump();
+    if (jumpableNodes.length === 1 && jumpableNodes[0].tabstop === 0) {
+      return;
+    }
     const session = new Session(denops, snippet, jumpableNodes);
-
-    // Set extmarks
-    await session.jumpableNodes[0].setExtmark();
+    return session;
   }
 
   currentNode(): Node.Jumpable {
