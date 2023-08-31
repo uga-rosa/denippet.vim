@@ -2,6 +2,7 @@
 // Copyright (c) 2019 hrsh7th
 
 import { Denops, fn, op } from "./deps.ts";
+import { splitLines } from "./util.ts";
 
 async function getOneIndent(
   denops: Denops,
@@ -42,4 +43,33 @@ export async function adjustIndent(
   text = text.replaceAll(/\n\s*\n/g, "\n\n");
 
   return text;
+}
+
+export function trimBaseIndent(
+  text: string,
+): string {
+  text = text.replaceAll(/\r\n?/g, "\n");
+  const isCharWise = !/\n$/.test(text);
+  text = text.replace(/\n$/, "");
+
+  let isFirstLine = true;
+  let baseIndent = "";
+  splitLines(text).forEach((line) => {
+    // Ignore the first line when the text created as char-wise
+    if (isCharWise && isFirstLine) {
+      isFirstLine = false;
+      return;
+    }
+    // Ignore empty line.
+    if (line === "") {
+      return;
+    }
+    // Detect most minimum base indent
+    const indent = line.match(/^\s*/)![0];
+    if (baseIndent === "" || indent.length < baseIndent.length) {
+      baseIndent = indent;
+    }
+  });
+
+  return text.replaceAll(new RegExp(`(^|\n)${baseIndent}`, "g"), "$1");
 }
