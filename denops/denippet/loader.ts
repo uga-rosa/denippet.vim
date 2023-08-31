@@ -1,4 +1,5 @@
 import { Denops, TOML, u, YAML } from "./deps.ts";
+import { toArray, toString } from "./util.ts";
 
 type RawSnippet = {
   prefix: string | string[];
@@ -47,14 +48,6 @@ export type Snippet = {
   body: string | ((denops: Denops) => Promise<string>);
   description: string;
 };
-
-function toArray<T>(x: T | T[]): T[] {
-  return Array.isArray(x) ? x : [x];
-}
-
-function toString(x: string | string[]): string {
-  return Array.isArray(x) ? x.join("\n") : x;
-}
 
 // Keys are filetypes
 const Cell: Record<string, Snippet[]> = {};

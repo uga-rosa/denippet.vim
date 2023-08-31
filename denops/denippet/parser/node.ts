@@ -1,4 +1,5 @@
 import { api, camelcase, Denops, LSP, lsputil } from "../deps.ts";
+import { splitLines } from "../util.ts";
 // import * as V from "../variable.ts";
 
 export const NAMESPACE = "denippet_jumpable_node";
@@ -19,10 +20,6 @@ export type FormatModifier =
   | "capitalize"
   | "camelcase"
   | "pascalcase";
-
-function splitLines(text: string): string[] {
-  return text.replaceAll(/\r\n?/g, "\n").split("\n");
-}
 
 function calcRange(start: LSP.Position, text: string): LSP.Range {
   const lines = splitLines(text);
