@@ -1,6 +1,14 @@
 import { Denops, lsputil, op, u } from "./deps.ts";
 import { getSnippets, load, NormalizedSnippet } from "./loader.ts";
+import { ParseError, Snippet } from "./parser/vscode.ts";
 import { Session } from "./session.ts";
+
+type CompleteItem = {
+  word: string;
+  kind?: string;
+  dup?: number;
+  user_data?: unknown;
+};
 
 type SearchResult = {
   prefix: string;
@@ -86,6 +94,28 @@ export function main(denops: Denops): void {
     async choice(dirU: unknown): Promise<void> {
       const dir = u.ensure(dirU, u.isLiteralOneOf([1, -1] as const));
       await session?.selectChoice(dir);
+    },
+
+    async getCompleteItems(): Promise<CompleteItem[]> {
+      const filetype = await op.filetype.get(denops);
+      return getSnippets(filetype).flatMap((snippet) =>
+        snippet.prefix.map((prefix) => ({
+          word: prefix,
+          kind: "Snippet",
+          dup: 1,
+          user_data: { denippet: { body: snippet.body } },
+        }))
+      );
+    },
+
+    async snippetToString(bodyU: unknown): Promise<string> {
+      const body = u.ensure(bodyU, u.isString);
+      const result = Snippet(body, 0, denops);
+      if (!result.parsed) {
+        throw new ParseError("Failed parsing");
+      }
+      const snippet = result.value;
+      return await snippet.getText();
     },
   };
 }

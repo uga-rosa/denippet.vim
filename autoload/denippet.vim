@@ -30,3 +30,11 @@ endfunction
 function denippet#choice(dir) abort
   call denops#request('denippet', 'choice', [a:dir])
 endfunction
+
+function denippet#get_complete_items() abort
+  return denops#request('denippet', 'getCompleteItems', [])
+endfunction
+
+function denippet#to_string(body) abort
+  return denops#request('denippet', 'snippetToString', [a:body])
+endfunction
