@@ -4,7 +4,7 @@ import { toArray, toString } from "./util.ts";
 type RawSnippet = {
   prefix: string | string[];
   body: string | string[];
-  description: string;
+  description?: string;
 };
 
 function assertRawSnippet(x: unknown): asserts x is Record<string, RawSnippet> {
@@ -14,7 +14,7 @@ function assertRawSnippet(x: unknown): asserts x is Record<string, RawSnippet> {
       u.isObjectOf({
         prefix: u.isOneOf([u.isString, u.isArrayOf(u.isString)]),
         body: u.isOneOf([u.isString, u.isArrayOf(u.isString)]),
-        description: u.isString,
+        description: u.isOptionalOf(u.isString),
       }),
     ),
   );
@@ -26,7 +26,7 @@ type TSSnippet = {
     | string
     | string[]
     | ((denops: Denops) => string | string[] | Promise<string | string[]>);
-  description: string;
+  description?: string;
 };
 
 function assertTSSnippet(x: unknown): asserts x is Record<string, TSSnippet> {
@@ -36,7 +36,7 @@ function assertTSSnippet(x: unknown): asserts x is Record<string, TSSnippet> {
       u.isObjectOf({
         prefix: u.isOneOf([u.isString, u.isArrayOf(u.isString)]),
         body: u.isOneOf([u.isString, u.isArrayOf(u.isString), u.isFunction]),
-        description: u.isString,
+        description: u.isOptionalOf(u.isString),
       }),
     ),
   );
@@ -46,7 +46,7 @@ export type Snippet = {
   name: string;
   prefix: string[];
   body: string | ((denops: Denops) => Promise<string>);
-  description: string;
+  description?: string;
 };
 
 // Keys are filetypes
