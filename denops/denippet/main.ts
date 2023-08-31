@@ -63,8 +63,15 @@ export function main(denops: Denops): void {
       session = await Session.create(denops, bodyStr);
     },
 
-    jumpable(): boolean {
-      return (session?.jumpableNodes.length ?? 0) > 0;
+    jumpable(dirU: unknown): boolean {
+      const dir = u.ensure(dirU, u.isLiteralOneOf([1, -1] as const));
+      if (session == null) {
+        return false;
+      } else if (dir === 1) {
+        return session.nodeIndex < session.jumpableNodes.length - 1;
+      } else {
+        return session.nodeIndex > 0;
+      }
     },
 
     async jump(dirU: unknown): Promise<void> {
