@@ -69,7 +69,7 @@ export class Session {
     // Store the cursor position before do linePatch
     const cursor = await lsputil.getCursor(denops);
     // Set the text to the buffer
-    const insertText = snippet.getText();
+    const insertText = await snippet.getText();
     await lsputil.linePatch(denops, 0, 0, insertText);
 
     // No jumpable node

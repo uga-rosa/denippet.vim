@@ -48,7 +48,7 @@ export abstract class Node {
     return ["tabstop", "placeholder", "choice"].includes(this.type);
   }
 
-  getText(): string {
+  getText(): string | Promise<string> {
     return "";
   }
 
@@ -57,10 +57,10 @@ export abstract class Node {
    * If text is changed, update also the buffer.
    */
   async updateRange(start: LSP.Position): Promise<LSP.Position> {
-    const text = this.getText();
+    const text = await this.getText();
     const newRange = calcRange(start, text);
     if (this.range && !isSameRange(this.range, newRange)) {
-      const replacement = splitLines(this.getText());
+      const replacement = splitLines(await this.getText());
       await lsputil.setText(this.denops, 0, this.range, replacement);
     }
     this.range = newRange;
@@ -84,8 +84,10 @@ export class Snippet extends Node {
     super();
   }
 
-  getText(): string {
-    return this.children.map((child) => child.getText()).join("");
+  async getText(): Promise<string> {
+    return await Promise.all(
+      this.children.map(async (child) => await child.getText()),
+    ).then((children) => children.join(""));
   }
 
   async updateRange(start?: LSP.Position): Promise<LSP.Position> {
@@ -202,11 +204,11 @@ export class Tabstop extends Jumpable {
     this.transformer = transform?.transformer;
   }
 
-  getText(): string {
+  async getText(): Promise<string> {
     if (this.input != null) {
       return this.input;
     } else if (this.copy) {
-      let text = this.copy.getText();
+      let text = await this.copy.getText();
       if (this.transformer) {
         text = this.transformer(text);
       }
@@ -232,13 +234,15 @@ export class Placeholder extends Jumpable {
     super();
   }
 
-  getText(): string {
+  async getText(): Promise<string> {
     if (this.input != null) {
       return this.input;
     } else if (this.copy) {
-      return this.copy.getText();
+      return await this.copy.getText();
     } else {
-      return this.children.map((child) => child.getText()).join("");
+      return await Promise.all(
+        this.children.map(async (child) => await child.getText()),
+      ).then((children) => children.join(""));
     }
   }
 
@@ -305,7 +309,7 @@ export class Variable extends Node {
       : (input: string) => input;
   }
 
-  getText(): string {
+  async getText(): Promise<string> {
     // TODO
     // const text = V[this.name]?.();
     return "";
