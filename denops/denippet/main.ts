@@ -1,4 +1,4 @@
-import { Denops, lsputil, op, u } from "./deps.ts";
+import { au, Denops, lambda, lsputil, op, u } from "./deps.ts";
 import { getSnippets, load, NormalizedSnippet } from "./loader.ts";
 import { ParseError, Snippet } from "./parser/vscode.ts";
 import { Session } from "./session.ts";
@@ -69,6 +69,26 @@ export function main(denops: Denops): void {
       u.assert(bodyStr, u.isString);
       await lsputil.linePatch(denops, prefix.length, 0, "");
       session = await Session.create(denops, bodyStr);
+      if (session != null) {
+        await au.group(denops, "denippet-session", (helper) => {
+          const clearId = lambda.register(denops, () => {
+            session = undefined;
+          });
+          helper.define(
+            "InsertLeave",
+            "*",
+            `call denops#notify('${denops.name}', '${clearId}', [])`,
+          );
+          const updateId = lambda.register(denops, async () => {
+            await session?.update();
+          });
+          helper.define(
+            "TextChangedI",
+            "*",
+            `call denops#notify('${denops.name}', '${updateId}', [])`,
+          );
+        });
+      }
     },
 
     jumpable(dirU: unknown): boolean {
