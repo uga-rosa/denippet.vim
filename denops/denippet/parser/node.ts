@@ -1,4 +1,4 @@
-import { api, camelcase, Denops, LSP, lsputil } from "../deps.ts";
+import { api, camelcase, Denops, fn, LSP, lsputil } from "../deps.ts";
 import { splitLines } from "../util.ts";
 // import * as V from "../variable.ts";
 
@@ -34,10 +34,6 @@ function isSamePosition(a: LSP.Position, b: LSP.Position): boolean {
   return a.line === b.line && a.character === b.character;
 }
 
-function isSameRange(a: LSP.Range, b: LSP.Range): boolean {
-  return isSamePosition(a.start, b.start) && isSamePosition(a.end, b.end);
-}
-
 export abstract class Node {
   abstract type: NodeType;
   abstract denops: Denops;
@@ -52,18 +48,10 @@ export abstract class Node {
     return "";
   }
 
-  /**
-   * Update this.range and return the position of end of range.
-   * If text is changed, update also the buffer.
-   */
+  /** Return the position of end of range. */
   async updateRange(start: LSP.Position): Promise<LSP.Position> {
     const text = await this.getText();
-    const newRange = calcRange(start, text);
-    if (this.range && !isSameRange(this.range, newRange)) {
-      const replacement = splitLines(await this.getText());
-      await lsputil.setText(this.denops, 0, this.range, replacement);
-    }
-    this.range = newRange;
+    this.range = calcRange(start, text);
     return this.range.end;
   }
 }
@@ -94,11 +82,34 @@ export class Snippet extends Node {
     if (!start && !this.range) {
       throw new Error("Internal error: Node.Snippet.updateRange");
     }
-    let pos = start ?? this.range!.start;
+    start = start ?? this.range!.start;
+    let pos = start;
     for (const child of this.children) {
       pos = await child.updateRange(pos);
     }
+    this.range = { start, end: pos };
     return pos;
+  }
+}
+
+function shiftRange(range: LSP.Range, start: LSP.Position): LSP.Range {
+  if (range.start.line === range.end.line) {
+    return {
+      start,
+      end: {
+        line: start.line,
+        character: start.character + range.end.character -
+          range.start.character,
+      },
+    };
+  } else {
+    return {
+      start,
+      end: {
+        line: start.line + range.end.line - range.start.line,
+        character: range.end.character,
+      },
+    };
   }
 }
 
@@ -149,6 +160,21 @@ export abstract class Jumpable extends Node {
       range16,
     );
     this.input = lines.join("\n");
+    console.log(this.input, this.range);
+  }
+
+  async updateRange(start: LSP.Position): Promise<LSP.Position> {
+    const text = await this.getText();
+    const newRange = calcRange(start, text);
+    if (this.copy != null && this.range != null) {
+      const range = shiftRange(this.range, start);
+      const replacement = splitLines(text);
+      // console.log(range, replacement);
+      await lsputil.setText(this.denops, 0, range, replacement);
+    }
+    this.range = newRange;
+    console.log("updateRange", this.range, text);
+    return this.range.end;
   }
 
   async setExtmark(): Promise<void> {
@@ -179,9 +205,14 @@ export abstract class Jumpable extends Node {
     if (!this.range) {
       throw new Error("Internal error: Node.Jumpable.jump");
     }
+    await this.drop();
     await this.setExtmark();
     const range = this.range;
     if (isSamePosition(range.start, range.end)) {
+      if (["s", "S", ""].includes(await fn.mode(this.denops))) {
+        await this.denops.cmd(`execute "normal! \\<Esc>"`);
+        await this.denops.cmd("startinsert");
+      }
       await lsputil.setCursor(this.denops, range.start);
       return;
     }
@@ -237,7 +268,7 @@ export class Placeholder extends Jumpable {
   async getText(): Promise<string> {
     if (this.input != null) {
       return this.input;
-    } else if (this.copy) {
+    } else if (this.copy != null) {
       return await this.copy.getText();
     } else {
       return await Promise.all(
@@ -251,10 +282,16 @@ export class Placeholder extends Jumpable {
   }
 
   async updateRange(start: LSP.Position): Promise<LSP.Position> {
+    if (this.input != null || this.copy != null) {
+      const text = await this.getText();
+      this.range = calcRange(start, text);
+      return this.range.end;
+    }
     let pos = start;
     for (const child of this.children) {
       pos = await child.updateRange(pos);
     }
+    this.range = { start, end: pos };
     return pos;
   }
 }
