@@ -1,6 +1,6 @@
+import { Denops, lsputil, op, u } from "./deps.ts";
 import * as Node from "./parser/node.ts";
 import { ParseError, Snippet } from "./parser/vscode.ts";
-import { Denops, lsputil, u } from "./deps.ts";
 import { adjustIndent } from "./indent.ts";
 
 export class Session {
@@ -95,7 +95,10 @@ export class Session {
 
   async update() {
     await this.currentNode().updateInput();
-    this.snippet.updateRange();
+    const eventignore = await op.eventignore.get(this.denops);
+    await op.eventignore.set(this.denops, "all");
+    await this.snippet.updateRange();
+    await op.eventignore.set(this.denops, eventignore);
   }
 
   async jump(dir: 1 | -1): Promise<void> {
