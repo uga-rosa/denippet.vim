@@ -93,7 +93,7 @@ export function main(denops: Denops): void {
 
     async choice(dirU: unknown): Promise<void> {
       const dir = u.ensure(dirU, u.isLiteralOneOf([1, -1] as const));
-      await session?.selectChoice(dir);
+      await session?.choice(dir);
     },
 
     async getCompleteItems(): Promise<CompleteItem[]> {
