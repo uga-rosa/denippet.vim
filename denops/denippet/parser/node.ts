@@ -1,4 +1,4 @@
-import { api, camelcase, Denops, fn, LSP, lsputil } from "../deps.ts";
+import { api, camelcase, Denops, LSP, lsputil } from "../deps.ts";
 import { splitLines } from "../util.ts";
 // import * as V from "../variable.ts";
 
@@ -160,7 +160,6 @@ export abstract class Jumpable extends Node {
       range16,
     );
     this.input = lines.join("\n");
-    console.log(this.input, this.range);
   }
 
   async updateRange(start: LSP.Position): Promise<LSP.Position> {
@@ -169,11 +168,9 @@ export abstract class Jumpable extends Node {
     if (this.copy != null && this.range != null) {
       const range = shiftRange(this.range, start);
       const replacement = splitLines(text);
-      // console.log(range, replacement);
       await lsputil.setText(this.denops, 0, range, replacement);
     }
     this.range = newRange;
-    console.log("updateRange", this.range, text);
     return this.range.end;
   }
 
@@ -207,17 +204,14 @@ export abstract class Jumpable extends Node {
     }
     await this.drop();
     await this.setExtmark();
+    await this.denops.call("denippet#select#cancel");
     const range = this.range;
     if (isSamePosition(range.start, range.end)) {
-      if (["s", "S", ""].includes(await fn.mode(this.denops))) {
-        await this.denops.cmd(`execute "normal! \\<Esc>"`);
-        await this.denops.cmd("startinsert");
-      }
       await lsputil.setCursor(this.denops, range.start);
       return;
     }
     const range8 = await lsputil.toUtf8Range(this.denops, 0, range, "utf-16");
-    await this.denops.call("denippet#internal#select", range8);
+    await this.denops.call("denippet#select#range", range8);
   }
 }
 
