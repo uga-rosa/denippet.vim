@@ -1,7 +1,24 @@
+function s:send_notify() abort
+  for [method, params] in s:pending_notify
+    call denops#notify('denippet', method, params)
+  endfor
+endfunction
+
+function s:notify_later(method, params) abort
+  let s:pending_notify = add(
+        \ get(s:, 'pending_notify', []), [a:method, a:params])
+  augroup denippet-notify
+    au!
+    au User DenopsPluginPost:denippet ++once call s:send_notify()
+  augroup END
+endfunction
+
 function s:notify(method, params = []) abort
-  call denops#plugin#wait_async('denippet', {
-        \ -> denops#notify('denippet', a:method, a:params)
-        \})
+  if denops#plugin#is_loaded('denippet')
+    call denops#notify('denippet', a:method, a:params)
+  else
+    call s:notify_later(a:method, a:params)
+  endif
 endfunction
 
 function s:request(method, params = []) abort
