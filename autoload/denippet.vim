@@ -1,40 +1,55 @@
-function denippet#load(filepath, ...) abort
-  const filetype = a:0 ? a:1 : a:filepath->fnamemodify(":t:r")
+function s:notify(method, params = []) abort
   call denops#plugin#wait_async('denippet', {
-        \ -> denops#notify('denippet', 'load', [a:filepath, filetype])
+        \ -> denops#notify('denippet', a:method, a:params)
         \})
 endfunction
 
+function s:request(method, params = []) abort
+  if denops#plugin#wait('denippet') != 0
+    return
+  endif
+  return denops#request('denippet', a:method, a:params)
+endfunction
+
+function denippet#load(filepath, ...) abort
+  const filetype = a:0 ? a:1 : a:filepath->fnamemodify(":t:r")
+  call s:notify('load', [a:filepath, filetype])
+endfunction
+
 function denippet#expandable() abort
-  return denops#request('denippet', 'expandable', [])
+  return s:request('expandable')
 endfunction
 
 function denippet#expand() abort
-  call denops#request('denippet', 'expand', [])
+  call s:notify('expand')
 endfunction
 
 function denippet#jumpable(...) abort
   const dir = a:0 ? a:1 : 1
-  return denops#request('denippet', 'jumpable', [dir])
+  return s:request('jumpable', [dir])
 endfunction
 
 function denippet#jump(...) abort
   const dir = a:0 ? a:1 : 1
-  call denops#request('denippet', 'jump', [dir])
+  call s:notify('jump', [dir])
 endfunction
 
 function denippet#choosable() abort
-  return denops#request('denippet', 'choosable', [])
+  return s:request('choosable')
 endfunction
 
 function denippet#choice(dir) abort
-  call denops#request('denippet', 'choice', [a:dir])
+  call s:notify('choice', [a:dir])
 endfunction
 
 function denippet#get_complete_items() abort
-  return denops#request('denippet', 'getCompleteItems', [])
+  return s:request('getCompleteItems')
 endfunction
 
 function denippet#to_string(body) abort
-  return denops#request('denippet', 'snippetToString', [a:body])
+  return s:request('snippetToString', [a:body])
+endfunction
+
+function denippet#anonymous(body) abort
+  call s:notify('anonymous', [a:body])
 endfunction
