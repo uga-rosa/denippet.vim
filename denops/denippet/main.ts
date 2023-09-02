@@ -65,10 +65,14 @@ export function main(denops: Denops): void {
       if (body == null) {
         return;
       }
-      const bodyStr = typeof body === "string" ? body : await body(denops);
-      u.assert(bodyStr, u.isString);
       await lsputil.linePatch(denops, prefix.length, 0, "");
-      session = await Session.create(denops, bodyStr);
+      const bodyStr = typeof body === "string" ? body : await body(denops);
+      await this.anonymous(bodyStr);
+    },
+
+    async anonymous(body: unknown): Promise<void> {
+      u.assert(body, u.isString);
+      session = await Session.create(denops, body);
       if (session != null) {
         await au.group(denops, "denippet-session", (helper) => {
           const clearId = lambda.register(denops, () => {
