@@ -53,3 +53,8 @@ endfunction
 function denippet#anonymous(body) abort
   call s:notify('anonymous', [a:body])
 endfunction
+
+function denippet#register_variable(name, cb) abort
+  let id = denops#callback#register(a:cb)
+  call s:notify('registerVariable', [a:name, id])
+endfunction

@@ -2,6 +2,7 @@ import { au, Denops, lambda, lsputil, op, u } from "./deps.ts";
 import { getSnippets, load, NormalizedSnippet } from "./loader.ts";
 import { ParseError, Snippet } from "./parser/vscode.ts";
 import { Session } from "./session.ts";
+import { register } from "./variable.ts";
 
 type CompleteItem = {
   word: string;
@@ -146,6 +147,17 @@ export function main(denops: Denops): void {
       }
       const snippet = result.value;
       return await snippet.getText();
+    },
+
+    registerVariable(nameU: unknown, idU: unknown): void {
+      const name = u.ensure(nameU, u.isString);
+      const id = u.ensure(idU, u.isString);
+      const cb = async (denops: Denops) => {
+        const retval = await denops.call("denops#callback#call", id);
+        u.assert(retval, u.isOptionalOf(u.isString));
+        return retval;
+      };
+      register(name, cb);
     },
   };
 }
