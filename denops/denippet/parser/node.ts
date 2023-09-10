@@ -1,6 +1,6 @@
 import { api, camelcase, Denops, LSP, lsputil } from "../deps.ts";
 import { splitLines } from "../util.ts";
-// import * as V from "../variable.ts";
+import * as V from "../variable.ts";
 
 export const NAMESPACE = "denippet_jumpable_node";
 
@@ -326,6 +326,7 @@ export class Choice extends Jumpable {
 export class Variable extends Node {
   type: "variable" = "variable";
   transformer: (input: string) => string;
+  text?: string;
 
   constructor(
     public denops: Denops,
@@ -341,9 +342,10 @@ export class Variable extends Node {
   }
 
   async getText(): Promise<string> {
-    // TODO
-    // const text = V[this.name]?.();
-    return "";
+    if (this.text == null) {
+      this.text = await V.call(this.denops, this.name) ?? "";
+    }
+    return this.text;
   }
 }
 
