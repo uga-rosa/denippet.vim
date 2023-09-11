@@ -3,12 +3,12 @@ import {
   DdcGatherItems,
   Item,
   Previewer,
-} from "https://deno.land/x/ddc_vim@v4.0.4/types.ts";
+} from "https://deno.land/x/ddc_vim@v4.0.5/types.ts";
 import {
   GatherArguments,
   GetPreviewerArguments,
   OnCompleteDoneArguments,
-} from "https://deno.land/x/ddc_vim@v4.0.4/base/source.ts";
+} from "https://deno.land/x/ddc_vim@v4.0.5/base/source.ts";
 import { Denops, op } from "../denippet/deps.ts";
 
 type Params = Record<PropertyKey, never>;
