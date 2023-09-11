@@ -31,7 +31,8 @@ async function searchSnippet(
     snippet.prefix.forEach((prefix) => {
       if (
         lineBeforeCursor.endsWith(prefix) &&
-        (bestMatch.prefix == null || prefix.length > bestMatch.prefix.length)
+        (bestMatch.prefix === undefined ||
+          prefix.length > bestMatch.prefix.length)
       ) {
         bestMatch = { prefix, body: snippet.body };
       }
@@ -58,12 +59,12 @@ export function main(denops: Denops): void {
 
     async expandable(): Promise<boolean> {
       const { body } = await searchSnippet(denops);
-      return body != null;
+      return body !== undefined;
     },
 
     async expand(): Promise<void> {
       const { prefix, body } = await searchSnippet(denops);
-      if (body == null) {
+      if (body === undefined) {
         return;
       }
       await lsputil.linePatch(denops, prefix.length, 0, "");
@@ -74,7 +75,7 @@ export function main(denops: Denops): void {
     async anonymous(body: unknown): Promise<void> {
       u.assert(body, u.isString);
       session = await Session.create(denops, body);
-      if (session != null) {
+      if (session !== undefined) {
         await au.group(denops, "denippet-session", (helper) => {
           const clearId = lambda.register(denops, () => {
             session = undefined;
@@ -98,7 +99,7 @@ export function main(denops: Denops): void {
 
     jumpable(dirU: unknown): boolean {
       const dir = u.ensure(dirU, u.isLiteralOneOf([1, -1] as const));
-      if (session == null) {
+      if (session === undefined) {
         return false;
       } else if (dir === 1) {
         return session.nodeIndex < session.jumpableNodes.length - 1;
@@ -109,7 +110,7 @@ export function main(denops: Denops): void {
 
     async jump(dirU: unknown): Promise<void> {
       const dir = u.ensure(dirU, u.isLiteralOneOf([1, -1] as const));
-      if (session == null) {
+      if (session === undefined) {
         return;
       }
       const sessionKeeped = session;
