@@ -42,7 +42,7 @@ async function searchSnippet(
 }
 
 export function main(denops: Denops): void {
-  let session: Session | undefined;
+  const session = new Session(denops);
 
   denops.dispatcher = {
     async load(
@@ -74,11 +74,11 @@ export function main(denops: Denops): void {
 
     async anonymous(body: unknown): Promise<void> {
       u.assert(body, u.isString);
-      session = await Session.create(denops, body);
-      if (session !== undefined) {
+      session.expand(body);
+      if (session.snippet) {
         await au.group(denops, "denippet-session", (helper) => {
           const clearId = lambda.register(denops, () => {
-            session = undefined;
+            session.drop(true);
           });
           helper.define(
             "InsertLeave",
@@ -86,7 +86,7 @@ export function main(denops: Denops): void {
             `call denops#notify('${denops.name}', '${clearId}', [])`,
           );
           const updateId = lambda.register(denops, async () => {
-            await session?.update();
+            await session.snippet?.update();
           });
           helper.define(
             "TextChangedI",
@@ -99,33 +99,27 @@ export function main(denops: Denops): void {
 
     jumpable(dirU: unknown): boolean {
       const dir = u.ensure(dirU, u.isLiteralOneOf([1, -1] as const));
-      if (session === undefined) {
-        return false;
-      } else if (dir === 1) {
-        return session.nodeIndex < session.jumpableNodes.length - 1;
-      } else {
-        return session.nodeIndex > 0;
-      }
+      return session.jumpable(dir);
     },
 
     async jump(dirU: unknown): Promise<void> {
       const dir = u.ensure(dirU, u.isLiteralOneOf([1, -1] as const));
-      if (session === undefined) {
+      if (!session.snippet) {
         return;
       }
-      const sessionKeeped = session;
+      session.guard();
       await session.jump(dir);
       await denops.cmd("do InsertLeave");
-      session = sessionKeeped;
+      session.unguard();
     },
 
     choosable(): boolean {
-      return session?.currentNode().type === "choice";
+      return session.choosable();
     },
 
     async choice(dirU: unknown): Promise<void> {
       const dir = u.ensure(dirU, u.isLiteralOneOf([1, -1] as const));
-      await session?.choice(dir);
+      await session.choice(dir);
     },
 
     async getCompleteItems(): Promise<CompleteItem[]> {

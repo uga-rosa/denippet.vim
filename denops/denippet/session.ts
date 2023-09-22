@@ -1,137 +1,64 @@
-import { Denops, lsputil, op, u } from "./deps.ts";
-import * as Node from "./parser/node.ts";
-import { ParseError, Snippet } from "./parser/vscode.ts";
-import { adjustIndent } from "./indent.ts";
+import { Denops } from "./deps.ts";
+import { Dir, Snippet } from "./snippet.ts";
 
 export class Session {
-  nodeIndex = 0;
+  snippet?: Snippet;
+  isGuarded = false;
 
   constructor(
     public denops: Denops,
-    public snippet: Node.Snippet,
-    public jumpableNodes: Node.Jumpable[],
   ) {}
 
-  static async create(
-    denops: Denops,
-    body: string,
-  ): Promise<Session | undefined> {
-    body = await adjustIndent(denops, body);
-    const result = Snippet(body, 0, denops);
-    if (!result.parsed) {
-      throw new ParseError("Failed parsing");
-    }
-    const snippet = result.value;
+  async expand(body: string): Promise<void> {
+    this.snippet = await Snippet.create(this.denops, body, this.snippet) ??
+      this.snippet;
+  }
 
-    // Resolve reference relationships using breadth first search.
-    const isJumpable = (token: Node.Node): token is Node.Jumpable =>
-      token.isJumpable();
-    const nodeQueue = snippet.children.filter((node) => node.type !== "text");
-    // Key is tabstop
-    const jumpableNodeMap = new Map<number, Node.Jumpable>();
-    while (true) {
-      const node = nodeQueue.shift();
-      if (!node) {
-        break;
-      }
-
-      if (u.isObjectOf({ children: u.isArray })(node)) {
-        nodeQueue.push(...node.children.filter(isJumpable));
-      }
-
-      if (!node.isJumpable()) {
-        continue;
-      }
-
-      const existNode = jumpableNodeMap.get(node.tabstop);
-      if (!existNode) {
-        jumpableNodeMap.set(node.tabstop, node);
-      } else if (node.getPriority() > existNode.getPriority()) {
-        existNode.copy = node;
-        jumpableNodeMap.set(node.tabstop, node);
-      } else {
-        node.copy = existNode;
-      }
-    }
-
-    // Sort in ascending order by tabstop.
-    const jumpableNodes = [...jumpableNodeMap.entries()]
-      .sort((a, b) => {
-        if (a[0] === 0) {
-          return 1;
-        } else if (b[0] === 0) {
-          return -1;
-        }
-        return a[0] - b[0];
-      })
-      .map((entry) => entry[1]);
-
-    // Store the cursor position before do linePatch
-    const cursor = await lsputil.getCursor(denops);
-    // Set the text to the buffer
-    const insertText = await snippet.getText();
-    await lsputil.linePatch(denops, 0, 0, insertText);
-
-    // No jumpable node
-    if (jumpableNodes.length === 0) {
+  drop(all = false): void {
+    if (this.isGuarded) {
       return;
     }
-
-    // Calculate range each node
-    await snippet.updateRange(cursor);
-
-    // Jump to the first node
-    await jumpableNodes[0].jump();
-    if (jumpableNodes.length === 1 && jumpableNodes[0].tabstop === 0) {
-      return;
-    }
-    const session = new Session(denops, snippet, jumpableNodes);
-    return session;
-  }
-
-  currentNode(): Node.Jumpable {
-    return this.jumpableNodes[this.nodeIndex];
-  }
-
-  async update() {
-    await this.currentNode().updateInput();
-    const eventignore = await op.eventignore.get(this.denops);
-    await op.eventignore.set(this.denops, "all");
-    await this.snippet.updateRange();
-    await op.eventignore.set(this.denops, eventignore);
-  }
-
-  async jump(dir: 1 | -1): Promise<void> {
-    if (dir === 1) {
-      if (this.nodeIndex >= this.jumpableNodes.length - 1) {
-        this.nodeIndex = this.jumpableNodes.length - 1;
-        return;
-      }
-      this.nodeIndex++;
+    if (all) {
+      this.snippet = undefined;
     } else {
-      if (this.nodeIndex <= 0) {
-        this.nodeIndex = 0;
-        return;
-      }
-      this.nodeIndex--;
+      this.snippet = this.snippet?.outer;
     }
-    await this.currentNode().jump();
   }
 
-  async choice(dir: 1 | -1): Promise<void> {
-    const node = this.currentNode();
-    if (!isChoiceNode(node)) {
+  guard(): void {
+    this.isGuarded = true;
+  }
+
+  unguard(): void {
+    this.isGuarded = false;
+  }
+
+  async update(): Promise<void> {
+    await this.snippet?.update();
+  }
+
+  jumpable(dir: Dir): boolean {
+    return !!this.snippet?.jumpable(dir);
+  }
+
+  async jump(dir: Dir): Promise<void> {
+    if (!this.snippet) {
       return;
     }
-    if (dir === 1) {
-      node.selectNext();
-    } else {
-      node.selectPrev();
+    let snippet: Snippet | undefined = this.snippet;
+    while (snippet && !await snippet.jump(dir)) {
+      snippet = snippet.outer;
     }
-    await this.snippet.updateRange();
+    if (snippet) {
+      this.snippet = snippet;
+    }
   }
-}
 
-function isChoiceNode(node: Node.Jumpable): node is Node.Choice {
-  return node.type === "choice";
+  choosable(): boolean {
+    return !!this.snippet?.choosable();
+  }
+
+  async choice(dir: Dir): Promise<void> {
+    await this.snippet?.choice(dir);
+  }
 }
