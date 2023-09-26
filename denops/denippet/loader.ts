@@ -1,46 +1,32 @@
-import { Denops, TOML, u, YAML } from "./deps.ts";
-import { toArray, toString } from "./util.ts";
+import { Denops, is, TOML, u, YAML } from "./deps.ts";
 
-type RawSnippet = {
-  prefix: string | string[];
-  body: string | string[];
-  description?: string;
-};
-
-function assertRawSnippet(x: unknown): asserts x is Record<string, RawSnippet> {
-  u.assert(
-    x,
-    u.isRecordOf(
-      u.isObjectOf({
-        prefix: u.isOneOf([u.isString, u.isArrayOf(u.isString)]),
-        body: u.isOneOf([u.isString, u.isArrayOf(u.isString)]),
-        description: u.isOptionalOf(u.isString),
-      }),
-    ),
-  );
+function toArray<T>(x: T | T[]): T[] {
+  return Array.isArray(x) ? x : [x];
 }
 
-type TSSnippet = {
-  prefix: string | string[];
-  body:
-    | string
-    | string[]
-    | ((denops: Denops) => string | string[] | Promise<string | string[]>);
-  description?: string;
-};
-
-function assertTSSnippet(x: unknown): asserts x is Record<string, TSSnippet> {
-  u.assert(
-    x,
-    u.isRecordOf(
-      u.isObjectOf({
-        prefix: u.isOneOf([u.isString, u.isArrayOf(u.isString)]),
-        body: u.isOneOf([u.isString, u.isArrayOf(u.isString), u.isFunction]),
-        description: u.isOptionalOf(u.isString),
-      }),
-    ),
-  );
+function toString(x: unknown): string {
+  if (is.ArrayOf(is.String)(x)) {
+    return x.join("\n");
+  } else {
+    return `${x}`;
+  }
 }
+
+const isRawSnippet = is.ObjectOf({
+  prefix: is.OneOf([is.String, is.ArrayOf(is.String)]),
+  body: is.OneOf([is.String, is.ArrayOf(is.String)]),
+  description: is.OptionalOf(is.String),
+});
+
+export type RawSnippet = u.PredicateType<typeof isRawSnippet>;
+
+const isTSSnippet = is.ObjectOf({
+  prefix: is.OneOf([is.String, is.ArrayOf(is.String)]),
+  body: is.OneOf([is.String, is.ArrayOf(is.String), is.Function]),
+  description: is.OptionalOf(is.String),
+});
+
+export type TSSnippet = u.PredicateType<typeof isTSSnippet>;
 
 export type NormalizedSnippet = {
   name: string;
@@ -81,7 +67,7 @@ export async function load(
       : extension === "toml"
       ? TOML.parse(raw)
       : YAML.parse(raw);
-    assertRawSnippet(content);
+    u.assert(content, is.RecordOf(isRawSnippet));
     snippets = Object.entries(content).map(([name, snip]) => ({
       name,
       prefix: toArray(snip.prefix),
@@ -90,14 +76,14 @@ export async function load(
     }));
   } else if (extension === "ts") {
     const content = await import(filepath).then((module) => module.snippets);
-    assertTSSnippet(content);
+    u.assert(content, is.RecordOf(isTSSnippet));
     snippets = Object.entries(content).map(([name, snip]) => ({
       name,
       prefix: toArray(snip.prefix),
       body: async (denops: Denops) => {
-        return typeof snip.body === "function"
-          ? toString(await snip.body(denops))
-          : toString(snip.body);
+        return toString(
+          typeof snip.body === "function" ? await snip.body(denops) : snip.body,
+        );
       },
       description: snip.description,
     }));
