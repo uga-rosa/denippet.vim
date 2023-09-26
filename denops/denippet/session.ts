@@ -34,7 +34,11 @@ export class Session {
   }
 
   async update(): Promise<void> {
-    await this.snippet?.update();
+    try {
+      await this.snippet?.update();
+    } catch {
+      this.drop();
+    }
   }
 
   jumpable(dir: Dir): boolean {

@@ -54,7 +54,11 @@ export function main(denops: Denops): void {
         filetypeU,
         is.OneOf([is.String, is.ArrayOf(is.String)]),
       );
-      await load(filepath, filetype);
+      try {
+        await load(filepath, filetype);
+      } catch (e) {
+        echoerr(denops, `Failed to load a snippet file ${filepath}.\n${e}`);
+      }
     },
 
     async expandable(): Promise<boolean> {
