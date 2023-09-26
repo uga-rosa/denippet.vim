@@ -21,7 +21,7 @@ function denippet#expandable() abort
 endfunction
 
 function denippet#expand() abort
-  call s:notify('expand')
+  call s:request('expand')
 endfunction
 
 function denippet#jumpable(...) abort
@@ -31,7 +31,7 @@ endfunction
 
 function denippet#jump(...) abort
   const dir = a:0 ? a:1 : 1
-  call s:notify('jump', [dir])
+  call s:request('jump', [dir])
 endfunction
 
 function denippet#choosable() abort
@@ -39,7 +39,7 @@ function denippet#choosable() abort
 endfunction
 
 function denippet#choice(dir) abort
-  call s:notify('choice', [a:dir])
+  call s:request('choice', [a:dir])
 endfunction
 
 function denippet#get_complete_items() abort
@@ -51,7 +51,7 @@ function denippet#to_string(body) abort
 endfunction
 
 function denippet#anonymous(body) abort
-  call s:notify('anonymous', [a:body])
+  call s:request('anonymous', [a:body])
 endfunction
 
 function denippet#register_variable(name, cb) abort
