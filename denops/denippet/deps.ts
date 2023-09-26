@@ -8,7 +8,8 @@ export * as op from "https://deno.land/x/denops_std@v5.0.1/option/mod.ts";
 export * as au from "https://deno.land/x/denops_std@v5.0.1/autocmd/mod.ts";
 export * as lambda from "https://deno.land/x/denops_std@v5.0.1/lambda/mod.ts";
 
-export * as u from "https://deno.land/x/unknownutil@v3.6.0/mod.ts";
+export * as u from "https://deno.land/x/unknownutil@v3.9.0/mod.ts";
+export { is } from "https://deno.land/x/unknownutil@v3.9.0/mod.ts";
 
 export * as lsputil from "https://deno.land/x/denops_lsputil@v0.5.4/mod.ts";
 export { LSP } from "https://deno.land/x/denops_lsputil@v0.5.4/deps.ts";

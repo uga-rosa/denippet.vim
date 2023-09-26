@@ -1,4 +1,4 @@
-import { Denops, lsputil, op, u } from "./deps.ts";
+import { Denops, is, lsputil, op } from "./deps.ts";
 import * as Node from "./parser/node.ts";
 import * as Parser from "./parser/vscode.ts";
 import { adjustIndent } from "./indent.ts";
@@ -39,7 +39,7 @@ export class Snippet {
         break;
       }
 
-      if (u.isObjectOf({ children: u.isArray })(node)) {
+      if (is.ObjectOf({ children: is.Array })(node)) {
         nodeQueue.push(...node.children.filter(isJumpable));
       }
 

@@ -1,4 +1,4 @@
-import { au, Denops, lambda, lsputil, op, u } from "./deps.ts";
+import { au, Denops, echoerr, is, lambda, lsputil, op, u } from "./deps.ts";
 import { getSnippets, load, NormalizedSnippet } from "./loader.ts";
 import { ParseError, Snippet } from "./parser/vscode.ts";
 import { Session } from "./session.ts";
@@ -49,10 +49,10 @@ export function main(denops: Denops): void {
       filepathU: unknown,
       filetypeU: unknown,
     ): Promise<void> {
-      const filepath = u.ensure(filepathU, u.isString);
+      const filepath = u.ensure(filepathU, is.String);
       const filetype = u.ensure(
         filetypeU,
-        u.isOneOf([u.isString, u.isArrayOf(u.isString)]),
+        is.OneOf([is.String, is.ArrayOf(is.String)]),
       );
       await load(filepath, filetype);
     },
@@ -72,8 +72,8 @@ export function main(denops: Denops): void {
       await this.anonymous(bodyStr);
     },
 
-    async anonymous(body: unknown): Promise<void> {
-      u.assert(body, u.isString);
+    async anonymous(bodyU: unknown): Promise<void> {
+      const body = u.ensure(bodyU, is.String);
       session.expand(body);
       if (session.snippet) {
         await au.group(denops, "denippet-session", (helper) => {
@@ -98,12 +98,12 @@ export function main(denops: Denops): void {
     },
 
     jumpable(dirU: unknown): boolean {
-      const dir = u.ensure(dirU, u.isLiteralOneOf([1, -1] as const));
+      const dir = u.ensure(dirU, is.LiteralOneOf([1, -1] as const));
       return session.jumpable(dir);
     },
 
     async jump(dirU: unknown): Promise<void> {
-      const dir = u.ensure(dirU, u.isLiteralOneOf([1, -1] as const));
+      const dir = u.ensure(dirU, is.LiteralOneOf([1, -1] as const));
       if (!session.snippet) {
         return;
       }
@@ -118,7 +118,7 @@ export function main(denops: Denops): void {
     },
 
     async choice(dirU: unknown): Promise<void> {
-      const dir = u.ensure(dirU, u.isLiteralOneOf([1, -1] as const));
+      const dir = u.ensure(dirU, is.LiteralOneOf([1, -1] as const));
       await session.choice(dir);
     },
 
@@ -135,7 +135,7 @@ export function main(denops: Denops): void {
     },
 
     async snippetToString(bodyU: unknown): Promise<string> {
-      const body = u.ensure(bodyU, u.isString);
+      const body = u.ensure(bodyU, is.String);
       const result = Snippet(body, 0, denops);
       if (!result.parsed) {
         throw new ParseError("Failed parsing");
@@ -145,11 +145,11 @@ export function main(denops: Denops): void {
     },
 
     registerVariable(nameU: unknown, idU: unknown): void {
-      const name = u.ensure(nameU, u.isString);
-      const id = u.ensure(idU, u.isString);
+      const name = u.ensure(nameU, is.String);
+      const id = u.ensure(idU, is.String);
       const cb = async (denops: Denops) => {
         const retval = await denops.call("denops#callback#call", id);
-        u.assert(retval, u.isOptionalOf(u.isString));
+        u.assert(retval, is.OptionalOf(is.String));
         return retval;
       };
       register(name, cb);
