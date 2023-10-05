@@ -146,8 +146,7 @@ const Transform = G.map(
     Slash,
     G.opt(G.pattern("[ig]+")),
   ),
-  (values, denops) =>
-    new N.Transform(denops, values[1].raw, values[3], values[5]),
+  (values, denops) => new N.Transform(denops, values[1].raw, values[3], values[5]),
 );
 
 const Tabstop = G.or(

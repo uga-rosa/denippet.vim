@@ -28,8 +28,7 @@ export class Snippet {
     const snippet = result.value;
 
     // Resolve reference relationships using breadth first search.
-    const isJumpable = (token: Node.Node): token is Node.Jumpable =>
-      token.isJumpable();
+    const isJumpable = (token: Node.Node): token is Node.Jumpable => token.isJumpable();
     const nodeQueue = snippet.children.filter((node) => node.type !== "text");
     // Key is tabstop
     const jumpableNodeMap = new Map<number, Node.Jumpable>();

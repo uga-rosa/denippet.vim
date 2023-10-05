@@ -336,9 +336,7 @@ export class Variable extends Node {
   ) {
     super();
 
-    this.transformer = transform
-      ? transform.transformer
-      : (input: string) => input;
+    this.transformer = transform ? transform.transformer : (input: string) => input;
   }
 
   async getText(): Promise<string> {

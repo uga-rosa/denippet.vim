@@ -1,3 +1,6 @@
 {
-  "lock": false
+  "lock": false,
+  "fmt": {
+    "lineWidth": 100
+  }
 }
