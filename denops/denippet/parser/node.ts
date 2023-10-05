@@ -204,14 +204,12 @@ export abstract class Jumpable extends Node {
     }
     await this.drop();
     await this.setExtmark();
-    await this.denops.call("denippet#select#cancel");
-    const range = this.range;
+    const range = await lsputil.toUtf8Range(this.denops, 0, this.range, "utf-16");
     if (isSamePosition(range.start, range.end)) {
-      await lsputil.setCursor(this.denops, range.start);
-      return;
+      await this.denops.call("denippet#jump#move", range.start);
+    } else {
+      await this.denops.call("denippet#jump#select", range);
     }
-    const range8 = await lsputil.toUtf8Range(this.denops, 0, range, "utf-16");
-    await this.denops.call("denippet#select#range", range8);
   }
 }
 
