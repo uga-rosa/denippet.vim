@@ -8,8 +8,6 @@ function denippet#jump#move(position) abort
   let cmd = ''
   if ['s', 'S', '']->index(mode()) >= 0
     let cmd .= "\<Esc>i"
-  elseif mode()[0] == 'i'
-    let cmd .= "\<Esc>"
   endif
   let cmd .= printf("\<Cmd>call cursor(%s, %s)\<CR>", pos[0], pos[1])
   call feedkeys(cmd, 'ni')
