@@ -128,7 +128,12 @@ export function main(denops: Denops): void {
 
     async getCompleteItems(): Promise<CompleteItem[]> {
       const filetype = await op.filetype.get(denops);
-      return getSnippets(filetype).flatMap((snippet) =>
+      return (await Promise.all(
+        getSnippets(filetype).map(async (snippet) => ({
+          ...snippet,
+          body: typeof snippet.body === "string" ? snippet.body : await snippet.body(denops),
+        })),
+      )).flatMap((snippet) =>
         snippet.prefix.map((prefix) => ({
           word: prefix,
           kind: "Snippet",
