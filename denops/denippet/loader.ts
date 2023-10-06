@@ -51,7 +51,10 @@ function setSnippets(
 }
 
 export function getSnippets(ft: string): NormalizedSnippet[] {
-  return Cell[ft] ?? [];
+  return [
+    ...Cell[ft] ?? [],
+    ...Cell["*"] ?? [],
+  ];
 }
 
 export async function load(

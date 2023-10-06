@@ -66,6 +66,9 @@ denippet#load({filepath}, [{filetype}...])		*denippet#load()*
 	Multiple filetypes can be specified.
 	If {filetype} is omitted, it is the {filename} removed the extension.
 
+	Using * for {filetype}, a global snippet can be defined. This is a
+	snippet available for all 'filetype'.
+
 
 denippet#expandable()					*denippet#expandable()*
 	Return |v:true| if expansion is possible, |v:false| otherwise.
