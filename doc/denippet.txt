@@ -21,6 +21,11 @@ expressions. Additionally, it allows the use of TypeScript functions, which
 means you can easily create snippets using powerful assets like date
 libraries.
 
+Requirements
+	- denops.vim: https://github.com/vim-denops/denops.vim
+	- Neovim: While there are plans to support Vim in the future, it is
+		  currently exclusive to Neovim.
+
 ==============================================================================
 MAPPINGS					*denippet-mappings*
 
