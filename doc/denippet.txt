@@ -1,0 +1,232 @@
+*denippet.txt*				Snippet plugin powered by typescript
+
+Author:  uga-rosa <uga6603@gmail.com>
+License: MIT License
+
+==============================================================================
+CONTENTS					*denippet-contents*
+
+INTRODUCTION					|denippet-introduction|
+COMMANDS					|denippet-commands|
+FUNCTIONS					|denippet-functions|
+SNIPPET GRAMMAR					|denippet-snippet-grammar|
+
+==============================================================================
+INTRODUCTION					*denippet-introduction*
+
+Denippet is a Neovim snippet plugin extended from VSCode's snippets. With the
+adoption of the denops ecosystem, it has overcome the weaknesses found in
+existing snippet plugins, such as those related to JavaScript regular
+expressions. Additionally, it allows the use of TypeScript functions, which
+means you can easily create snippets using powerful assets like date
+libraries.
+
+==============================================================================
+MAPPINGS					*denippet-mappings*
+
+<Plug>(denippet-expand)				*<Plug>(denippet-expand)*
+	Defined in insert mode (|imap|).
+
+	Expand the snippet when the string before the cursor matches the
+	trigger.
+
+
+<Plug>(denippet-jump-next)			*<Plug>(denippet-jump-next)*
+<Plug>(denippet-jump-prev)			*<Plug>(denippet-jump-prev)*
+	Defined in insert and select mode (|imap|, |smap|).
+
+	Go to the next or previous tabstop.
+
+
+<Plug>(denippet-expand-or-jump)			*<Plug>(denippet-expand-or-jump)*
+	Defined in insert mode (|imap|).
+
+	If it can be expanded, it will be expanded. If not, and if it is
+	possible to jump to the next tabstop, jump.
+
+
+<Plug>(denippet-choice-next)			*<Plug>(denippet-choice-next)*
+<Plug>(denippet-choice-prev)			*<Plug>(denippet-choice-prev)*
+	Defined in insert mode (|imap|).
+
+	Choose the next or previous choice in the choice node.
+
+
+==============================================================================
+FUNCTIONS					*denippet-functions*
+
+denippet#load({filepath}, [{filetype}...])		*denippet#load()*
+	Load the snippet definition file.
+
+	Multiple filetypes can be specified.
+	If {filetype} is omitted, it is the {filename} removed the extension.
+
+
+denippet#expandable()					*denippet#expandable()*
+	Return |v:true| if expansion is possible, |v:false| otherwise.
+
+
+denippet#expand()					*denippet#expand()*
+	Same as |<Plug>(denippet-expand)|.
+
+
+denippet#jumpable([{dir}])				*denippet#jumpable()*
+	{dir} where 1 means "next" and -1 means "previous".
+	Return |v:true| if jump is possible, |v:false| otherwise.
+
+
+denippet#jump([{dir}])					*denippet#jump()*
+	{dir} where 1 means "next" and -1 means "previous".
+	Same as |<Plug>(denippet-jump-next)| and |<Plug>(denippet-jump-prev)|.
+
+
+denippet#choosable([{dir}])				*denippet#choosable()*
+	{dir} where 1 means "next" and -1 means "previous".
+	Return |v:true| if choice is possible, |v:false| otherwise.
+
+
+denippet#choice([{dir}])				*denippet#choice()*
+	{dir} where 1 means "next" and -1 means "previous".
+	Same as |<Plug>(denippet-choice-next)| and |<Plug>(denippet-choice-prev)|.
+
+
+==============================================================================
+SNIPPET GRAMMAR					*denippet-snippet-grammar*
+
+Snippets in denippet are basically written in VSCode-compatible grammar.
+
+https://code.visualstudio.com/docs/editor/userdefinedsnippets
+
+json/toml/yaml/typescript are available for snippet definition files. To
+register snippets, use |denippet#load()|. The structure of the file is as
+follows: >json
+	{
+	  "For Loop": {
+	    "prefix": ["for", "for-const"],
+	    "body": [
+	      "for (const ${2:element} of ${1:array}) {",
+	      "\t$0",
+	      "}"
+	    ],
+	    "description": "A for loop."
+	  }
+	}
+<
+The type of "prefix" and "body" are `string` or `string[]`, "description" is
+an optional `string`. Multiple prefixes can be set for a single snippet by
+making it an array. When body is an array, the meaning is different from
+prefix; each element means a line. In other words, it is equivalent to a
+string in which each element of the array is concatenated with a newline.
+
+Note in TypeScript that the file structures of json/toml/yaml are different.
+You need to export an object named "snippets". While its structure is
+essentially the same the above, it differs in that you can use function in
+"body". Please define the "body" function to take `denops` as an argument and
+return either a string or an array of strings. >typescript
+	export const snippets = {
+	  uuid: {
+	    prefix: "uuid",
+	    body: () => crypto.randomUUID(),
+	  },
+	};
+<
+The "prefix" is the trigger that expands the snippet, the "body" is the text
+that is actually expanded. The \t (tab character) at the beginning of a line
+in "body" is corrected to the appropriate indentation. And the "description"
+is the description of the snippet, but this plugin by itself does not have the
+ability to display this. If you want to see it, combine it with the completion
+plugin.
+
+
+You can use tabstops in the snippet. You can navigate between the tabstops
+with |denippet#jump()|. For defailed syntax, please refer to the link.
+https://code.visualstudio.com/docs/editor/userdefinedsnippets#_snippet-syntax
+
+To explain briefly, it goes as follows:
+
+Tabstops ~
+	With tabstops, you can make the editor cursor move inside a snippet.
+	Use `$1`, `$2` to specify cursor locations. The number is the order in
+	which tabstops will be visited, whereas `$0` denotes the final cursor
+	position. Since multi-cursors cannot be implemented in Vim, multiple
+	tab stops with the same number are represented by editing one primary
+	location, and its copies are updated in real-time to reflect the
+	changes.
+
+Placeholders ~
+	Placeholders are tabstops with values, like `${1:foo}`. The placeholder
+	text will be inserted and selected such that it can be easily changed.
+	Placeholders can be nested, like `${1:another ${2:placeholder}}`.
+
+	By omitting the default value following the colon (e.g., `${1}`), it
+	becomes equivalent to the above-mentioned tabstops. This is
+	convenient when a number follows a tabstop. >
+		foo${1}100
+<
+Choice ~
+	Placeholders can have choices as values. The syntax is a
+	comma-separated enumeration of values, enclosed with the
+	pipe-character, for example `${1|one,two,three|}`. You can select the
+	choice by |denippet#choice()|.
+
+While these three are the jumpable ones, there are other syntaxes that hold
+special meanings.
+
+Variables ~
+	With `$name` or `${name:default}`, you can insert the value of a
+	variable. When a variable isn't set, its default or the empty string
+	is inserted.
+
+	A list of variables is here.
+	https://code.visualstudio.com/docs/editor/userdefinedsnippets#_variables
+
+Transformer ~
+
+Variable-Transform ~
+	Transformations allow you to modify the value of a variable before it
+	is inserted. The definition of a transformation consists of three
+	parts:
+
+	1. A regular expression that is matched against the value of a
+	   variable, or the empty string when the variable cannot be resolved.
+	2. A "format string" that allows to reference matching groups from the
+	   regular expression. The format string allows for conditional
+	   inserts and simple modifications.
+	3. Options that are passed to the regular expression.
+
+	The following example inserts the name of the current file without its
+	ending, so from foo.txt it makes foo. >
+	${TM_FILENAME/(.*)\\..+$/$1/}
+	  |           |         |  |
+	  |           |         |  |-> no options
+	  |           |         |
+	  |           |         |-> references the contents of the first
+	  |           |             capture group
+	  |           |
+	  |           |-> regex to capture everything before
+	  |               the final `.suffix`
+	  |
+	  |-> resolves to the filename
+<
+Placeholder-Transforms ~
+	Like a Variable-Transform, a transformation of a placeholder allows
+	changing the inserted text for the placeholder when moving to the next
+	tab stop. The inserted text is matched with the regular expression and
+	the match or matches - depending on the options are replaced with the
+	specified replacement format text. Every occurrence of a placeholder
+	can define its own transformation independently using the value of the
+	first placeholder. The format for Placeholder-Transforms is the same
+	as for Variable-Transforms.
+
+Transform examples ~
+
+Example					Output				Explanation
+----------------------------------------------------------------------------------------------------------
+"${TM_FILENAME/[\\.]/_/}"		jexample-123_456-TEST.js	Replace the first . with _
+"${TM_FILENAME/[\\.-]/_/g}"		example_123_456_TEST_js		Replace each . or - with _
+"${TM_FILENAME/(.*)/${1:/upcase}/}"	EXAMPLE-123.456-TEST.JS		Change to all uppercase
+"${TM_FILENAME/[^0-9^a-z]//gi}"		example123456TESTjs		Remove non-alphanumeric characters
+
+
+==============================================================================
+vim:tw=78:ts=8:noet:ft=help:norl:
