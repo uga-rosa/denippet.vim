@@ -78,7 +78,7 @@ export function main(denops: Denops): void {
 
     async anonymous(bodyU: unknown): Promise<void> {
       const body = u.ensure(bodyU, is.String);
-      session.expand(body);
+      await session.expand(body);
       if (session.snippet) {
         await au.group(denops, "denippet-session", (helper) => {
           const clearId = lambda.register(denops, () => {
