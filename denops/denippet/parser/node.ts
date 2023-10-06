@@ -323,23 +323,23 @@ export class Choice extends Jumpable {
 
 export class Variable extends Node {
   type: "variable" = "variable";
-  transformer: (input: string) => string;
   text?: string;
 
   constructor(
     public denops: Denops,
     public name: string,
-    transform?: Transform,
+    public transform?: Transform,
     public children?: Snippet["children"],
   ) {
     super();
-
-    this.transformer = transform ? transform.transformer : (input: string) => input;
   }
 
   async getText(): Promise<string> {
     if (this.text === undefined) {
       this.text = await V.call(this.denops, this.name) ?? "";
+      if (this.transform) {
+        this.text = this.transform.transformer(this.text);
+      }
     }
     return this.text;
   }
