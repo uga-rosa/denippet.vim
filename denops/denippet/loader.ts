@@ -13,7 +13,7 @@ function toString(x: unknown): string {
 }
 
 const isRawSnippet = is.ObjectOf({
-  prefix: is.OneOf([is.String, is.ArrayOf(is.String)]),
+  prefix: is.OptionalOf(is.OneOf([is.String, is.ArrayOf(is.String)])),
   body: is.OneOf([is.String, is.ArrayOf(is.String)]),
   description: is.OptionalOf(is.String),
 });
@@ -21,7 +21,7 @@ const isRawSnippet = is.ObjectOf({
 export type RawSnippet = u.PredicateType<typeof isRawSnippet>;
 
 const isTSSnippet = is.ObjectOf({
-  prefix: is.OneOf([is.String, is.ArrayOf(is.String)]),
+  prefix: is.OptionalOf(is.OneOf([is.String, is.ArrayOf(is.String)])),
   body: is.OneOf([is.String, is.ArrayOf(is.String), is.Function]),
   description: is.OptionalOf(is.String),
 });
@@ -73,7 +73,7 @@ export async function load(
     u.assert(content, is.RecordOf(isRawSnippet));
     snippets = Object.entries(content).map(([name, snip]) => ({
       name,
-      prefix: toArray(snip.prefix),
+      prefix: toArray(snip.prefix ?? name),
       body: toString(snip.body),
       description: snip.description,
     }));
@@ -82,7 +82,7 @@ export async function load(
     u.assert(content, is.RecordOf(isTSSnippet));
     snippets = Object.entries(content).map(([name, snip]) => ({
       name,
-      prefix: toArray(snip.prefix),
+      prefix: toArray(snip.prefix ?? name),
       body: async (denops: Denops) => {
         return toString(
           typeof snip.body === "function" ? await snip.body(denops) : snip.body,
