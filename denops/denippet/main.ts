@@ -1,6 +1,5 @@
 import { au, Denops, echoerr, is, lambda, lsputil, op, u } from "./deps.ts";
 import { getSnippets, load, NormalizedSnippet } from "./loader.ts";
-import { ParseError, Snippet } from "./parser/vscode.ts";
 import { Session } from "./session.ts";
 import { register } from "./variable.ts";
 
@@ -143,14 +142,13 @@ export function main(denops: Denops): void {
       );
     },
 
-    async snippetToString(bodyU: unknown): Promise<string> {
+    snippetToString(bodyU: unknown): string {
       const body = u.ensure(bodyU, is.String);
-      const result = Snippet(body, 0, denops);
-      if (!result.parsed) {
-        throw new ParseError("Failed parsing");
+      const parsed = lsputil.parseSnippet(body);
+      if (parsed === "") {
+        throw new Error("Failed parsing");
       }
-      const snippet = result.value;
-      return await snippet.getText();
+      return parsed;
     },
 
     registerVariable(nameU: unknown, idU: unknown): void {
