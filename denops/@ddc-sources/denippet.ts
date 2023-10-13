@@ -9,7 +9,8 @@ import {
   GetPreviewerArguments,
   OnCompleteDoneArguments,
 } from "https://deno.land/x/ddc_vim@v4.0.5/base/source.ts";
-import { Denops, lsputil, op } from "../denippet/deps.ts";
+import { Denops, op } from "../denippet/deps/denops.ts";
+import { lsputil } from "../denippet/deps/lsp.ts";
 
 type Params = Record<PropertyKey, never>;
 
