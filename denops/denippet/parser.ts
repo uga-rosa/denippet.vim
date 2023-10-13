@@ -21,25 +21,25 @@ export async function parse(
   function convert(n: LN.Text): Node.Text;
   function convert(n: ElementOf<LN.Snippet["children"]>): ElementOf<Node.Snippet["children"]>;
   function convert(n: ElementOf<LN.Snippet["children"]>): ElementOf<Node.Snippet["children"]> {
-    if (LN.isTabstop(n)) {
+    if (n.type === "tabstop") {
       return new Node.Tabstop(
         denops,
         n.tabstop,
         convertTransform(n.transform),
       );
-    } else if (LN.isPlaceholder(n)) {
+    } else if (n.type === "placeholder") {
       return new Node.Placeholder(denops, n.tabstop, n.children?.map(convert));
-    } else if (LN.isChoice(n)) {
+    } else if (n.type === "choice") {
       return new Node.Choice(denops, n.tabstop, n.items);
-    } else if (LN.isVariable(n)) {
+    } else if (n.type === "variable") {
       return new Node.Variable(
         denops,
         n.name,
         convertTransform(n.transform),
         n.children?.map(convert),
       );
-    } else if (LN.isText(n)) {
-      return new Node.Text(denops, n.text);
+    } else if (n.type === "text") {
+      return convertText(n);
     } else {
       throw new Error("Unknown node");
     }
@@ -52,7 +52,7 @@ export async function parse(
     return new Node.Transform(
       denops,
       n.pattern,
-      n.formats.map((n) => LN.isFormat(n) ? convertFormat(n) : convertText(n)),
+      n.formats.map((n) => n.type === "format" ? convertFormat(n) : convertText(n)),
       n.options,
     );
   }
