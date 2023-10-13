@@ -1,7 +1,7 @@
 // https://github.com/hrsh7th/vim-vsnip/blob/7753ba9c10429c29d25abfd11b4c60b76718c438/autoload/vsnip/indent.vim
 // Copyright (c) 2019 hrsh7th
 
-import { Denops, fn, op } from "./deps.ts";
+import { Denops, fn, op } from "./deps/denops.ts";
 import { splitLines } from "./util.ts";
 
 async function getOneIndent(

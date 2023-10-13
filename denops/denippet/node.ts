@@ -1,4 +1,6 @@
-import { api, camelcase, Denops, LSP, lsputil } from "./deps.ts";
+import { api, Denops } from "./deps/denops.ts";
+import { LSP, lsputil } from "./deps/lsp.ts";
+import { camelcase } from "./deps/camelcase.ts";
 import { splitLines } from "./util.ts";
 import * as V from "./variable.ts";
 

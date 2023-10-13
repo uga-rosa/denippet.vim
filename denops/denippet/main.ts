@@ -1,4 +1,6 @@
-import { au, Denops, echoerr, is, lambda, lsputil, op, u } from "./deps.ts";
+import { au, Denops, echoerr, lambda, op } from "./deps/denops.ts";
+import { is, u } from "./deps/unknownutil.ts";
+import { lsputil } from "./deps/lsp.ts";
 import { getSnippets, load, NormalizedSnippet } from "./loader.ts";
 import { Session } from "./session.ts";
 import { register } from "./variable.ts";

@@ -1,4 +1,5 @@
-import { Denops, LN, lsputil } from "./deps.ts";
+import { Denops } from "./deps/denops.ts";
+import { LN, lsputil } from "./deps/lsp.ts";
 import * as Node from "./node.ts";
 import { adjustIndent } from "./indent.ts";
 

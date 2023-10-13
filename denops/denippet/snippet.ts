@@ -1,4 +1,6 @@
-import { Denops, is, lsputil, op } from "./deps.ts";
+import { Denops, op } from "./deps/denops.ts";
+import { lsputil } from "./deps/lsp.ts";
+import { is } from "./deps/unknownutil.ts";
 import * as Node from "./node.ts";
 import { parse } from "./parser.ts";
 

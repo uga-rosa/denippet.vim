@@ -1,4 +1,6 @@
-import { Denops, is, TOML, u, YAML } from "./deps.ts";
+import { Denops } from "./deps/denops.ts";
+import { TOML, YAML } from "./deps/std.ts";
+import { is, u } from "./deps/unknownutil.ts";
 
 function toArray<T>(x: T | T[]): T[] {
   return Array.isArray(x) ? x : [x];

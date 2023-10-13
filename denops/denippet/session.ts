@@ -1,4 +1,4 @@
-import { Denops } from "./deps.ts";
+import { Denops } from "./deps/denops.ts";
 import { Dir, Snippet } from "./snippet.ts";
 
 export class Session {

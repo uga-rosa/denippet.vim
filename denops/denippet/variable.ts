@@ -1,6 +1,6 @@
 // https://code.visualstudio.com/docs/editor/userdefinedsnippets#_variables
 
-import { Denops, fn, op } from "./deps.ts";
+import { Denops, fn, op } from "./deps/denops.ts";
 import { trimBaseIndent } from "./indent.ts";
 
 export type VariableFunc = (denops: Denops) =>
