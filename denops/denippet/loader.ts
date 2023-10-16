@@ -28,7 +28,11 @@ const isTSSnippet = is.ObjectOf({
   description: is.OptionalOf(is.String),
 });
 
-export type TSSnippet = u.PredicateType<typeof isTSSnippet>;
+export type TSSnippet = {
+  prefix?: string | string[];
+  body: string | string[] | ((denops: Denops) => string | string[] | Promise<string | string[]>);
+  description?: string;
+};
 
 export type NormalizedSnippet = {
   name: string;
