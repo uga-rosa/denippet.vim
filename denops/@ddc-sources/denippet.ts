@@ -10,7 +10,6 @@ import {
   OnCompleteDoneArguments,
 } from "https://deno.land/x/ddc_vim@v4.0.5/base/source.ts";
 import { Denops, op } from "../denippet/deps/denops.ts";
-import { lsputil } from "../denippet/deps/lsp.ts";
 
 type Params = Record<PropertyKey, never>;
 
@@ -31,7 +30,6 @@ export class Source extends BaseSource<Params> {
 
   async onCompleteDone({
     denops,
-    userData,
   }: OnCompleteDoneArguments<Params, UserData>): Promise<void> {
     // Not expanded if confirmed with additional input.
     const itemWord = await denops.eval(`v:completed_item.word`) as string;
@@ -42,8 +40,7 @@ export class Source extends BaseSource<Params> {
       return;
     }
 
-    await lsputil.linePatch(denops, itemWord.length, 0, "");
-    await denops.dispatch("denippet", "anonymous", userData.denippet.body);
+    await denops.dispatch("denippet", "expand");
     await denops.call("ddc#skip_next_complete");
   }
 
