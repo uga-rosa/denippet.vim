@@ -4,12 +4,13 @@ import { lsputil } from "./deps/lsp.ts";
 import { getSnippets, load, NormalizedSnippet } from "./loader.ts";
 import { Session } from "./session.ts";
 import { register } from "./variable.ts";
+import { UserData } from "../@ddc-sources/denippet.ts";
 
 type CompleteItem = {
   word: string;
   kind?: string;
   dup?: number;
-  user_data?: unknown;
+  user_data?: UserData;
 };
 
 type SearchResult = {
@@ -134,7 +135,12 @@ export function main(denops: Denops): void {
           word: prefix,
           kind: "Snippet",
           dup: 1,
-          user_data: { denippet: { body: snippet.body } },
+          user_data: {
+            denippet: {
+              body: typeof snippet.body === "string" ? snippet.body : "",
+              description: snippet.description ?? "",
+            },
+          },
         }))
       );
     },
@@ -143,7 +149,7 @@ export function main(denops: Denops): void {
       const body = u.ensure(bodyU, is.String);
       const parsed = lsputil.parseSnippet(body);
       if (parsed === "") {
-        throw new Error("Failed parsing");
+        throw new Error(`Failed parsing: ${body}`);
       }
       return parsed;
     },

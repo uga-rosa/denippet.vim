@@ -13,9 +13,10 @@ import { Denops, op } from "../denippet/deps/denops.ts";
 
 type Params = Record<PropertyKey, never>;
 
-type UserData = {
+export type UserData = {
   denippet: {
     body: string;
+    description: string;
   };
 };
 
@@ -52,11 +53,17 @@ export class Source extends BaseSource<Params> {
     if (userData === undefined) {
       return { kind: "empty" };
     }
-    const contents = await this.snippetToString(denops, userData.denippet.body)
-      .then((body) => body.replaceAll(/\r\n?/g, "\n").split("\n"));
-    const filetype = await op.filetype.get(denops);
-    contents.unshift("```" + filetype);
-    contents.push("```");
+    const contents: string[] = await this.snippetToString(denops, userData.denippet.body)
+      .then((body) => body.replaceAll(/\r\n?/g, "\n").split("\n"))
+      .catch(() => []);
+    if (contents.length > 0) {
+      const filetype = await op.filetype.get(denops);
+      contents.unshift("```" + filetype);
+      contents.push("```");
+    }
+    if (userData.denippet.description) {
+      contents.unshift(userData.denippet.description);
+    }
     return { kind: "markdown", contents };
   }
 
