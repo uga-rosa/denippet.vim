@@ -22,17 +22,19 @@ const isRawSnippet = is.ObjectOf({
 
 export type RawSnippet = u.PredicateType<typeof isRawSnippet>;
 
+function isBodyFunc(
+  x: unknown,
+): x is (denops: Denops) => string | string[] | Promise<string | string[]> {
+  return typeof x === "function";
+}
+
 const isTSSnippet = is.ObjectOf({
   prefix: is.OptionalOf(is.OneOf([is.String, is.ArrayOf(is.String)])),
-  body: is.OneOf([is.String, is.ArrayOf(is.String), is.Function]),
+  body: is.OneOf([is.String, is.ArrayOf(is.String), isBodyFunc]),
   description: is.OptionalOf(is.String),
 });
 
-export type TSSnippet = {
-  prefix?: string | string[];
-  body: string | string[] | ((denops: Denops) => string | string[] | Promise<string | string[]>);
-  description?: string;
-};
+export type TSSnippet = u.PredicateType<typeof isTSSnippet>;
 
 export type NormalizedSnippet = {
   name: string;
