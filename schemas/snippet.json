@@ -1,15 +1,9 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$schema": "https://json-schema.org/draft-07/schema#",
   "title": "Snippets",
   "type": "object",
   "patternProperties": {
     ".*": {
-      "$ref": "#/definitions/RawSnippet"
-    }
-  },
-  "additionalProperties": false,
-  "definitions": {
-    "RawSnippet": {
       "type": "object",
       "required": [
         "body"
@@ -48,5 +42,6 @@
         }
       }
     }
-  }
+  },
+  "additionalProperties": false
 }
