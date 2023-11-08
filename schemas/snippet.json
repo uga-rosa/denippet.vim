@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Snippets",
+  "type": "object",
+  "patternProperties": {
+    ".*": {
+      "$ref": "#/definitions/RawSnippet"
+    }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "RawSnippet": {
+      "type": "object",
+      "required": [
+        "body"
+      ],
+      "properties": {
+        "prefix": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1
+            }
+          ]
+        },
+        "body": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+              "minItems": 1
+            }
+          ]
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
