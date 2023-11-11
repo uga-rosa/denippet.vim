@@ -120,30 +120,68 @@ follows: >json
 	  }
 	}
 <
-The type of "prefix" and "body" are `string` or `string[]`, "description" is
-an optional `string`. Multiple prefixes can be set for a single snippet by
-making it an array. When body is an array, the meaning is different from
-prefix; each element means a line. In other words, it is equivalent to a
-string in which each element of the array is concatenated with a newline.
+Fields ~
+	"prefix"	(string|string[])
+		The trigger that expands the snippet. If ommited, the name
+		(the key of the object, in the example "For Loop") is used
+		instead. Multiple prefixes can be set for a single snippet by
+		making it an array.
+	"body"		(string|string[])	required!
+		The text that is actually expanded. The \t (tab character) at
+		the beginning of a line in "body" is corrected to the
+		appropriate indentation. When body is an array, the meaning is
+		different from prefix; each element means a line. In other
+		words, it is equivalent to a string in which each element of
+		the array is concatenated with a newline.
+	"description"	(string)
+		the description of the snippet, but this plugin by itself does
+		not have the ability to display this. If you want to see it,
+		combine it with the completion plugin.
+	"if"		("base"|"start"|"vimscript"|"lua")
+		You can specify the conditions under which the snippet is
+		expanded.
+		"base"		Available only when the current buffer is
+				empty.
+		"start"		Available only at the beginning of the line.
+		"vimscript"	Available only if |eval()| is used to evaluate
+				the string specified in "eval" and the return
+				value is truthy. >toml
+		[foo]
+		prefix = "foo"
+		body = "bar"
+		if = "vimscript"
+		eval = "line('.') == 1"
+<
+		"lua"		Available only if |loadstring()| is used to
+				evaluate the string specified in "eval" and
+				the return value is truthy. >toml
+		[foo]
+		prefix = "foo"
+		body = "bar"
+		if = "lua"
+		eval = """
+		local function foo()
+		  return true
+		end
+		return foo()
+		"""
+<
+	"eval"		(string)
+		String evaluated when "if" is "vimscript" or "lua".
+
 
 Note in TypeScript that the file structures of json/toml/yaml are different.
 You need to export an object named "snippets". While its structure is
 essentially the same the above, it differs in that you can use function in
-"body". Please define the "body" function to take `denops` as an argument and
-return either a string or an array of strings. >typescript
-	export const snippets = {
+"body" and "if". See type `TSSnippet` for details. >typescript
+	import { TSSnippet } from "https://deno.land/x/denippet_vim@v0.1.0/loader.ts";
+
+	export const snippets: Record<string, TSSnippet> = {
 	  uuid: {
 	    prefix: "uuid",
 	    body: () => crypto.randomUUID(),
 	  },
 	};
-<
-The "prefix" is the trigger that expands the snippet, the "body" is the text
-that is actually expanded. The \t (tab character) at the beginning of a line
-in "body" is corrected to the appropriate indentation. And the "description"
-is the description of the snippet, but this plugin by itself does not have the
-ability to display this. If you want to see it, combine it with the completion
-plugin.
 
 
 You can use tabstops in the snippet. You can navigate between the tabstops
