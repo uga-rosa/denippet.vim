@@ -29,7 +29,7 @@ async function searchSnippet(
 
   let bestMatch: SearchResult = {};
   const filetype = await op.filetype.get(denops);
-  getSnippets(filetype).forEach((snippet) => {
+  (await getSnippets(denops, filetype)).forEach((snippet) => {
     snippet.prefix.forEach((prefix) => {
       if (
         lineBeforeCursor.endsWith(prefix) &&
@@ -130,7 +130,7 @@ export function main(denops: Denops): void {
 
     async getCompleteItems(): Promise<CompleteItem[]> {
       const filetype = await op.filetype.get(denops);
-      return getSnippets(filetype).flatMap((snippet) =>
+      return (await getSnippets(denops, filetype)).flatMap((snippet) =>
         snippet.prefix.map((prefix) => ({
           word: prefix,
           kind: "Snippet",

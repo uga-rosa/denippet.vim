@@ -39,6 +39,17 @@
         },
         "description": {
           "type": "string"
+        },
+        "if": {
+          "enum": [
+            "base",
+            "start",
+            "vimscript",
+            "lua"
+          ]
+        },
+        "eval": {
+          "type": "string"
         }
       }
     }
