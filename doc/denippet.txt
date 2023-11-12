@@ -11,7 +11,6 @@ COMMANDS					|denippet-commands|
 FUNCTIONS					|denippet-functions|
 SNIPPET GRAMMAR					|denippet-snippet-grammar|
 
-
 ==============================================================================
 INTRODUCTION					*denippet-introduction*
 
@@ -23,9 +22,9 @@ means you can easily create snippets using powerful assets like date
 libraries.
 
 Requirements
-	- Neovim
-	- denops.vim	https://github.com/vim-denops/denops.vim
-
+	- denops.vim: https://github.com/vim-denops/denops.vim
+	- Neovim: While there are plans to support Vim in the future, it is
+		  currently exclusive to Neovim.
 
 ==============================================================================
 MAPPINGS					*denippet-mappings*
