@@ -1,4 +1,4 @@
-# denippet.vim
+# denippet.nvim
 
 Denippet is a Neovim snippet plugin extended from VSCode's snippets. Powered by
 [denops.vim](https://github.com/vim-denops/denops.vim).
