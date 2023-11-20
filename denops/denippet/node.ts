@@ -223,16 +223,13 @@ export abstract class Jumpable extends Node {
 
 export class Tabstop extends Jumpable {
   type: "tabstop" = "tabstop";
-  transformer?: (input: string) => string;
 
   constructor(
     public denops: Denops,
     public tabstop: number,
-    transform?: Transform,
+    public transform?: Transform,
   ) {
     super();
-
-    this.transformer = transform?.transformer;
   }
 
   async getText(onJump?: boolean): Promise<string> {
@@ -241,7 +238,7 @@ export class Tabstop extends Jumpable {
     } else if (this.copy) {
       let text = await this.copy.getText(onJump);
       if (onJump && this.transform) {
-        text = this.transformer(text);
+        text = this.transform.transformer(text);
       }
       return text;
     } else {
@@ -250,7 +247,7 @@ export class Tabstop extends Jumpable {
   }
 
   getPriority(): number {
-    return this.transformer ? -1 : 0;
+    return this.transform ? -1 : 0;
   }
 }
 
