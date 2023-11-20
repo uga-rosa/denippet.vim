@@ -1,4 +1,4 @@
-import { Denops } from "./deps/denops.ts";
+import { au, Denops } from "./deps/denops.ts";
 import { Dir, Snippet } from "./snippet.ts";
 
 export class Session {
@@ -14,17 +14,6 @@ export class Session {
       this.snippet;
   }
 
-  drop(all = false): void {
-    if (this.isGuarded) {
-      return;
-    }
-    if (all) {
-      this.snippet = undefined;
-    } else {
-      this.snippet = this.snippet?.outer;
-    }
-  }
-
   guard(): void {
     this.isGuarded = true;
   }
@@ -33,11 +22,28 @@ export class Session {
     this.isGuarded = false;
   }
 
+  async drop(all = false): Promise<void> {
+    if (this.isGuarded) {
+      return;
+    }
+    if (all) {
+      await au.group(this.denops, "denippet-session", (helper) => {
+        helper.remove(["ModeChanged", "TextChangedI"]);
+      });
+      this.snippet = undefined;
+    } else {
+      this.snippet = this.snippet?.outer;
+    }
+  }
+
   async update(): Promise<void> {
+    if (this.isGuarded) {
+      return;
+    }
     try {
       await this.snippet?.update();
     } catch {
-      this.drop();
+      await this.drop();
     }
   }
 

@@ -83,16 +83,16 @@ export function main(denops: Denops): void {
       await session.expand(body);
       if (session.snippet) {
         await au.group(denops, "denippet-session", (helper) => {
-          const clearId = lambda.register(denops, () => {
-            session.drop(true);
+          const clearId = lambda.register(denops, async () => {
+            await session.drop(true);
           });
           helper.define(
-            "InsertLeave",
-            "*",
+            "ModeChanged",
+            "*:n",
             `call denops#notify('${denops.name}', '${clearId}', [])`,
           );
           const updateId = lambda.register(denops, async () => {
-            await session.snippet?.update();
+            await session.update();
           });
           helper.define(
             "TextChangedI",
@@ -116,7 +116,7 @@ export function main(denops: Denops): void {
       session.guard();
       await session.jump(dir);
       await denops.cmd("do InsertLeave");
-      session.unguard();
+      setTimeout(() => session.unguard(), 100);
     },
 
     choosable(): boolean {
