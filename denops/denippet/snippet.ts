@@ -93,10 +93,14 @@ export class Snippet {
 
   async update(): Promise<void> {
     await this.currentNode().updateInput();
+    // Extmark could disappear with updateRange().
+    const range = this.currentNode().range!;
     const eventignore = await op.eventignore.get(this.denops);
     await op.eventignore.set(this.denops, "all");
     await this.snippet.updateRange();
     await op.eventignore.set(this.denops, eventignore);
+    this.currentNode().range = range;
+    this.currentNode().setExtmark();
   }
 
   jumpable(dir: Dir): boolean {
