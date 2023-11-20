@@ -122,6 +122,7 @@ export class Snippet {
       return false;
     }
     await this.currentNode().jump();
+    await this.snippet.updateRange(undefined, true);
     return true;
   }
 
