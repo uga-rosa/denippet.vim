@@ -342,10 +342,10 @@ export class Variable extends Node {
     super();
   }
 
-  async getText(onJump?: boolean): Promise<string> {
+  async getText(): Promise<string> {
     if (this.text === undefined) {
       this.text = await V.call(this.denops, this.name) ?? "";
-      if (onJump && this.transform) {
+      if (this.transform) {
         this.text = this.transform.transformer(this.text);
       }
     }
