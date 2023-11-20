@@ -46,7 +46,7 @@ export abstract class Node {
     return ["tabstop", "placeholder", "choice"].includes(this.type);
   }
 
-  getText(_onJump?: boolean): string | Promise<string> {
+  getText(_tabstop?: number): string | Promise<string> {
     return "";
   }
 
@@ -82,7 +82,7 @@ export class Snippet extends Node {
 
   async updateRange(
     start?: LSP.Position,
-    onJump?: boolean,
+    tabstop?: number,
   ): Promise<LSP.Position> {
     if (!start && !this.range) {
       throw new Error("Internal error: Node.Snippet.updateRange");
@@ -90,7 +90,7 @@ export class Snippet extends Node {
     start = start ?? this.range!.start;
     let pos = start;
     for (const child of this.children) {
-      pos = await child.updateRange(pos, onJump);
+      pos = await child.updateRange(pos, tabstop);
     }
     this.range = { start, end: pos };
     return pos;
@@ -169,9 +169,9 @@ export abstract class Jumpable extends Node {
 
   async updateRange(
     start: LSP.Position,
-    onJump?: boolean,
+    tabstop?: number,
   ): Promise<LSP.Position> {
-    const text = await this.getText(onJump);
+    const text = await this.getText(tabstop);
     const newRange = calcRange(start, text);
     if (this.copy !== undefined && this.range !== undefined) {
       const range = shiftRange(this.range, start);
@@ -232,12 +232,12 @@ export class Tabstop extends Jumpable {
     super();
   }
 
-  async getText(onJump?: boolean): Promise<string> {
+  async getText(tabstop?: number): Promise<string> {
     if (this.input !== undefined) {
       return this.input;
     } else if (this.copy) {
-      let text = await this.copy.getText(onJump);
-      if (onJump && this.transform) {
+      let text = await this.copy.getText(tabstop);
+      if (tabstop !== this.tabstop && this.transform) {
         text = this.transform.transformer(text);
       }
       return text;
@@ -262,14 +262,14 @@ export class Placeholder extends Jumpable {
     super();
   }
 
-  async getText(onJump?: boolean): Promise<string> {
+  async getText(tabstop?: number): Promise<string> {
     if (this.input !== undefined) {
       return this.input;
     } else if (this.copy !== undefined) {
       return await this.copy.getText();
     } else {
       return await Promise.all(
-        this.children.map(async (child) => await child.getText(onJump)),
+        this.children.map(async (child) => await child.getText(tabstop)),
       ).then((children) => children.join(""));
     }
   }
@@ -280,16 +280,16 @@ export class Placeholder extends Jumpable {
 
   async updateRange(
     start: LSP.Position,
-    onJump?: boolean,
+    tabstop?: number,
   ): Promise<LSP.Position> {
     if (this.input !== undefined || this.copy !== undefined) {
-      const text = await this.getText(onJump);
+      const text = await this.getText(tabstop);
       this.range = calcRange(start, text);
       return this.range.end;
     }
     let pos = start;
     for (const child of this.children) {
-      pos = await child.updateRange(pos, onJump);
+      pos = await child.updateRange(pos, tabstop);
     }
     this.range = { start, end: pos };
     return pos;

@@ -97,7 +97,7 @@ export class Snippet {
     const range = this.currentNode().range!;
     const eventignore = await op.eventignore.get(this.denops);
     await op.eventignore.set(this.denops, "all");
-    await this.snippet.updateRange();
+    await this.snippet.updateRange(undefined, this.currentNode().tabstop);
     await op.eventignore.set(this.denops, eventignore);
     this.currentNode().range = range;
     this.currentNode().setExtmark();
@@ -121,8 +121,8 @@ export class Snippet {
     } else {
       return false;
     }
+    await this.snippet.updateRange(undefined, this.currentNode().tabstop);
     await this.currentNode().jump();
-    await this.snippet.updateRange(undefined, true);
     return true;
   }
 
