@@ -22,7 +22,7 @@ export class Session {
     this.isGuarded = false;
   }
 
-  async drop(all = false): Promise<void> {
+  async drop(all?: boolean): Promise<void> {
     if (this.isGuarded) {
       return;
     }
