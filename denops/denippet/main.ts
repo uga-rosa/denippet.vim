@@ -4,7 +4,6 @@ import { lsputil } from "./deps/lsp.ts";
 import { getSnippets, load, NormalizedSnippet } from "./loader.ts";
 import { Session } from "./session.ts";
 import { register } from "./variable.ts";
-import { linePatch } from "./util.ts";
 import { UserData } from "../@ddc-sources/denippet.ts";
 
 type CompleteItem = {
@@ -74,14 +73,14 @@ export function main(denops: Denops): void {
       if (body == null) {
         return;
       }
-      await linePatch(denops, prefix.length, 0, "");
       const bodyStr = typeof body == "string" ? body : await body(denops);
-      await this.anonymous(bodyStr);
+      await this.anonymous(bodyStr, prefix);
     },
 
-    async anonymous(bodyU: unknown): Promise<void> {
+    async anonymous(bodyU: unknown, prefixU: unknown): Promise<void> {
       const body = u.ensure(bodyU, is.String);
-      if (await session.expand(body)) {
+      const prefix = u.ensure(prefixU, is.OptionalOf(is.String));
+      if (await session.expand(body, prefix)) {
         await au.group(denops, "denippet-session", (helper) => {
           const clearId = lambda.register(denops, async () => {
             await session.drop(true);

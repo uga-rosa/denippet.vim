@@ -21,6 +21,7 @@ export class Snippet {
     denops: Denops,
     body: string,
     outer?: Snippet,
+    prefix?: string,
   ): Promise<Snippet> {
     const snippet = await parse(denops, body);
 
@@ -68,9 +69,10 @@ export class Snippet {
 
     // Store the cursor position before do linePatch
     const cursor = await lsputil.getCursor(denops);
+    cursor.character -= prefix?.length ?? 0;
     // Set the text to the buffer
     const insertText = await snippet.getText();
-    await linePatch(denops, 0, 0, insertText);
+    await linePatch(denops, prefix?.length ?? 0, 0, insertText);
 
     // Calculate range each node
     await snippet.updateRange(cursor);
