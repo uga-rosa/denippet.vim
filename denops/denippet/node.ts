@@ -185,6 +185,7 @@ export abstract class Jumpable extends Node {
     if (!this.range) {
       throw new Error("Internal error: Node.Jumpable.setExtmark");
     }
+    await this.drop();
     this.extmarkId = await api.nvim_buf_set_extmark(
       this.denops,
       0,
