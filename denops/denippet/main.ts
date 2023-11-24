@@ -4,6 +4,7 @@ import { lsputil } from "./deps/lsp.ts";
 import { getSnippets, load, NormalizedSnippet } from "./loader.ts";
 import { Session } from "./session.ts";
 import { register } from "./variable.ts";
+import { linePatch } from "./util.ts";
 import { UserData } from "../@ddc-sources/denippet.ts";
 
 type CompleteItem = {
@@ -73,7 +74,7 @@ export function main(denops: Denops): void {
       if (body === undefined) {
         return;
       }
-      await lsputil.linePatch(denops, prefix.length, 0, "");
+      await linePatch(denops, prefix.length, 0, "");
       const bodyStr = typeof body === "string" ? body : await body(denops);
       await this.anonymous(bodyStr);
     },

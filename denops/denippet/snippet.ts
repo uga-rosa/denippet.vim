@@ -3,6 +3,7 @@ import { lsputil } from "./deps/lsp.ts";
 import { is } from "./deps/unknownutil.ts";
 import * as Node from "./node.ts";
 import { parse } from "./parser.ts";
+import { linePatch } from "./util.ts";
 
 export type Dir = 1 | -1;
 
@@ -69,7 +70,7 @@ export class Snippet {
     const cursor = await lsputil.getCursor(denops);
     // Set the text to the buffer
     const insertText = await snippet.getText();
-    await lsputil.linePatch(denops, 0, 0, insertText);
+    await linePatch(denops, 0, 0, insertText);
 
     // Calculate range each node
     await snippet.updateRange(cursor);
