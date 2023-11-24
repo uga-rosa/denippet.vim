@@ -79,7 +79,7 @@ register("RELATIVE_FILEPATH", async (denops: Denops) => {
 /** The contents of your clipboard */
 register("CLIPBOARD", async (denops: Denops) => {
   const clipboard = await fn.getreg(denops) as string;
-  if (typeof clipboard === "string") {
+  if (typeof clipboard == "string") {
     return trimBaseIndent(clipboard);
   }
 });

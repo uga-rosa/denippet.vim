@@ -127,7 +127,7 @@ export abstract class Jumpable extends Node {
 
   #nsId?: number;
   async nsId(): Promise<number> {
-    if (this.#nsId === undefined) {
+    if (this.#nsId == null) {
       this.#nsId = await api.nvim_create_namespace(
         this.denops,
         NAMESPACE,
@@ -138,7 +138,7 @@ export abstract class Jumpable extends Node {
 
   // Fire on TextChangedI
   async updateInput(): Promise<void> {
-    if (this.extmarkId === undefined) {
+    if (this.extmarkId == null) {
       return;
     }
     const [
@@ -152,7 +152,7 @@ export abstract class Jumpable extends Node {
       this.extmarkId,
       { details: true },
     ) as [number, number, { end_row: number; end_col: number }];
-    if (row === undefined) {
+    if (row == null) {
       // Invalid extmark id
       return;
     }
@@ -169,7 +169,7 @@ export abstract class Jumpable extends Node {
   ): Promise<LSP.Position> {
     const text = await this.getText(tabstop);
     const newRange = calcRange(start, text);
-    if (this.copy !== undefined && this.range !== undefined) {
+    if (this.copy != null && this.range != null) {
       const range = shiftRange(this.range, start);
       const replacement = splitLines(text);
       const originalText = await lsputil.getText(this.denops, 0, range);
@@ -233,7 +233,7 @@ export class Tabstop extends Jumpable {
   }
 
   async getText(tabstop?: number): Promise<string> {
-    if (this.input !== undefined) {
+    if (this.input != null) {
       return this.input;
     } else if (this.copy) {
       let text = await this.copy.getText(tabstop);
@@ -263,9 +263,9 @@ export class Placeholder extends Jumpable {
   }
 
   async getText(tabstop?: number): Promise<string> {
-    if (this.input !== undefined) {
+    if (this.input != null) {
       return this.input;
-    } else if (this.copy !== undefined) {
+    } else if (this.copy != null) {
       return await this.copy.getText();
     } else {
       return await Promise.all(
@@ -282,7 +282,7 @@ export class Placeholder extends Jumpable {
     start: LSP.Position,
     tabstop?: number,
   ): Promise<LSP.Position> {
-    if (this.input !== undefined || this.copy !== undefined) {
+    if (this.input != null || this.copy != null) {
       const text = await this.getText(tabstop);
       this.range = calcRange(start, text);
       return this.range.end;
@@ -343,7 +343,7 @@ export class Variable extends Node {
   }
 
   async getText(): Promise<string> {
-    if (this.text === undefined) {
+    if (this.text == null) {
       this.text = await V.call(this.denops, this.name) ?? "";
       if (this.transform) {
         this.text = this.transform.transformer(this.text);

@@ -34,7 +34,7 @@ async function searchSnippet(
     snippet.prefix.forEach((prefix) => {
       if (
         lineBeforeCursor.endsWith(prefix) &&
-        (bestMatch.prefix === undefined ||
+        (bestMatch.prefix == null ||
           prefix.length > bestMatch.prefix.length)
       ) {
         bestMatch = { prefix, body: snippet.body };
@@ -66,16 +66,16 @@ export function main(denops: Denops): void {
 
     async expandable(): Promise<boolean> {
       const { body } = await searchSnippet(denops);
-      return body !== undefined;
+      return body != null;
     },
 
     async expand(): Promise<void> {
       const { prefix, body } = await searchSnippet(denops);
-      if (body === undefined) {
+      if (body == null) {
         return;
       }
       await linePatch(denops, prefix.length, 0, "");
-      const bodyStr = typeof body === "string" ? body : await body(denops);
+      const bodyStr = typeof body == "string" ? body : await body(denops);
       await this.anonymous(bodyStr);
     },
 
@@ -137,7 +137,7 @@ export function main(denops: Denops): void {
           dup: 1,
           user_data: {
             denippet: {
-              body: typeof snippet.body === "string" ? snippet.body : "",
+              body: typeof snippet.body == "string" ? snippet.body : "",
               description: snippet.description ?? "",
             },
           },

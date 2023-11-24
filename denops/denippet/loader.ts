@@ -20,13 +20,13 @@ export type RawSnippet = u.PredicateType<typeof isRawSnippet>;
 function isBodyFunc(
   x: unknown,
 ): x is (denops: Denops) => string | string[] | Promise<string | string[]> {
-  return typeof x === "function";
+  return typeof x == "function";
 }
 
 function isIfFunc(
   x: unknown,
 ): x is (denops: Denops) => boolean | Promise<boolean> {
-  return typeof x === "function";
+  return typeof x == "function";
 }
 
 const isTSSnippet = is.ObjectOf({
@@ -64,7 +64,7 @@ function setSnippets(
   snippets: NormalizedSnippet[],
 ): void {
   toArray(filetype).forEach((ft) => {
-    if (Cell[ft] === undefined) {
+    if (Cell[ft] == null) {
       Cell[ft] = [];
     }
     Cell[ft].push(...snippets);
@@ -80,7 +80,7 @@ export async function getSnippets(
     ...Cell["*"] ?? [],
   ];
   return await asyncFilter(snippets, async (snippet) => {
-    if (snippet.if === undefined) {
+    if (snippet.if == null) {
       return true;
     } else if (isIfFunc(snippet.if)) {
       return Boolean(await snippet.if(denops));
@@ -127,7 +127,7 @@ export async function load(
       prefix: toArray(snip.prefix ?? name),
       body: async (denops: Denops) => {
         return toString(
-          typeof snip.body === "function" ? await snip.body(denops) : snip.body,
+          typeof snip.body == "function" ? await snip.body(denops) : snip.body,
         );
       },
     }));

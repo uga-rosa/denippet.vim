@@ -47,7 +47,7 @@ export async function parse(
   }
 
   function convertTransform(n?: LN.Transform): Node.Transform | undefined {
-    if (n === undefined) {
+    if (n == null) {
       return;
     }
     return new Node.Transform(

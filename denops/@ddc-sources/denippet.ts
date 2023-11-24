@@ -50,7 +50,7 @@ export class Source extends BaseSource<Params> {
     item,
   }: GetPreviewerArguments<Params, UserData>): Promise<Previewer> {
     const userData = item.user_data;
-    if (userData === undefined) {
+    if (userData == null) {
       return { kind: "empty" };
     }
     const contents: string[] = await this.snippetToString(denops, userData.denippet.body)
