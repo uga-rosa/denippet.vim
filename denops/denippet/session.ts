@@ -31,18 +31,14 @@ export class Session {
     this.isGuarded = false;
   }
 
-  async drop(all?: boolean): Promise<void> {
+  async drop(): Promise<void> {
     if (this.isGuarded) {
       return;
     }
-    if (all) {
-      await au.group(this.denops, "denippet-session", (helper) => {
-        helper.remove(["ModeChanged", "TextChangedI"]);
-      });
-      this.snippet = undefined;
-    } else {
-      this.snippet = this.snippet?.outer;
-    }
+    this.snippet = undefined;
+    await au.group(this.denops, "denippet-session", (helper) => {
+      helper.remove(["ModeChanged", "TextChangedI"]);
+    });
   }
 
   async update(): Promise<void> {

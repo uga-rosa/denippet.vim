@@ -83,7 +83,7 @@ export function main(denops: Denops): void {
       if (await session.expand(body, prefix)) {
         await au.group(denops, "denippet-session", (helper) => {
           const clearId = lambda.register(denops, async () => {
-            await session.drop(true);
+            await session.drop();
           });
           helper.define(
             "ModeChanged",
