@@ -185,7 +185,7 @@ export abstract class Jumpable extends Node {
     if (!this.range) {
       throw new Error("Internal error: Node.Jumpable.setExtmark");
     }
-    await this.drop();
+    await this.clear();
     this.extmarkId = await api.nvim_buf_set_extmark(
       this.denops,
       0,
@@ -201,7 +201,7 @@ export abstract class Jumpable extends Node {
     ) as number;
   }
 
-  async drop(): Promise<void> {
+  async clear(): Promise<void> {
     const nsId = await this.nsId();
     await api.nvim_buf_clear_namespace(this.denops, 0, nsId, 0, -1);
   }
@@ -210,7 +210,7 @@ export abstract class Jumpable extends Node {
     if (!this.range) {
       throw new Error("Internal error: Node.Jumpable.jump");
     }
-    await this.drop();
+    await this.clear();
     await this.setExtmark();
     const range = await lsputil.toUtf8Range(this.denops, 0, this.range, "utf-16");
     if (isSamePosition(range.start, range.end)) {

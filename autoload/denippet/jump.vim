@@ -20,8 +20,8 @@ function denippet#jump#select(range) abort
   let virtualedit = &virtualedit
   let eventignore = &eventignore
   let cmd = ''
-  let cmd .= "\<Cmd>set eventignore=all\<CR>"
   let cmd .= "\<Cmd>set virtualedit=onemore\<CR>"
+  let cmd .= "\<Cmd>set eventignore=all\<CR>"
   if ['i', 's', 'S', '']->index(mode()[0]) >= 0
     let cmd .= "\<Esc>"
   endif
@@ -31,8 +31,8 @@ function denippet#jump#select(range) abort
   if &selection !=# 'exclusive'
     let cmd .= 'h'
   endif
-  let cmd .= printf("\<Cmd>set virtualedit=%s\<CR>", virtualedit)
   let cmd .= "\<C-g>"
+  let cmd .= printf("\<Cmd>set virtualedit=%s\<CR>", virtualedit)
   let cmd .= printf("\<Cmd>set eventignore=%s\<CR>", eventignore)
   call feedkeys(cmd, 'ni')
 endfunction
