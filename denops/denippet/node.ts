@@ -23,6 +23,10 @@ export type FormatModifier =
   | "camelcase"
   | "pascalcase";
 
+function isSamePosition(a: LSP.Position, b: LSP.Position): boolean {
+  return a.line === b.line && a.character === b.character;
+}
+
 function calcRange(start: LSP.Position, text: string): LSP.Range {
   const lines = splitLines(text);
   const endLine = start.line + lines.length - 1;
@@ -30,10 +34,6 @@ function calcRange(start: LSP.Position, text: string): LSP.Range {
     ? lines[lines.length - 1].length
     : start.character + text.length;
   return { start, end: { line: endLine, character: endCharacter } };
-}
-
-function isSamePosition(a: LSP.Position, b: LSP.Position): boolean {
-  return a.line === b.line && a.character === b.character;
 }
 
 export abstract class Node {
@@ -158,12 +158,8 @@ export abstract class Jumpable extends Node {
     }
     const range8 = lsputil.createRange(row, col, end_row, end_col);
     const range16 = await lsputil.toUtf16Range(this.denops, 0, range8, "utf-8");
+    const lines = await lsputil.getText(this.denops, 0, range16);
     this.range = range16;
-    const lines = await lsputil.getText(
-      this.denops,
-      0,
-      range16,
-    );
     this.input = lines.join("\n");
   }
 
