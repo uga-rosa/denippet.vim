@@ -47,9 +47,9 @@ export async function linePatch(
   insertText: string,
 ): Promise<void> {
   const cursor = await lsputil.getCursor(denops);
+  const lines = splitLines(insertText);
 
   function shift(pos: LSP.Position): LSP.Position {
-    const lines = splitLines(insertText);
     if (lines.length > 1) {
       return {
         line: pos.line + lines.length - 1,
