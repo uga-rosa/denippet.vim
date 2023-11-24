@@ -9,9 +9,15 @@ export class Session {
     public denops: Denops,
   ) {}
 
-  async expand(body: string): Promise<void> {
-    this.snippet = await Snippet.create(this.denops, body, this.snippet) ??
-      this.snippet;
+  async expand(body: string): Promise<boolean> {
+    const snippet = await Snippet.create(this.denops, body, this.snippet);
+    if (snippet.jumpableNodes.length > 0 && snippet.jumpableNodes[0].tabstop > 0) {
+      this.snippet = snippet;
+      return true;
+    } else {
+      // No jumpable nodes or only $0
+      return false;
+    }
   }
 
   guard(): void {

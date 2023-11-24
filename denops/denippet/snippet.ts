@@ -20,7 +20,7 @@ export class Snippet {
     denops: Denops,
     body: string,
     outer?: Snippet,
-  ): Promise<Snippet | undefined> {
+  ): Promise<Snippet> {
     const snippet = await parse(denops, body);
 
     // Resolve reference relationships using breadth first search.
@@ -71,19 +71,11 @@ export class Snippet {
     const insertText = await snippet.getText();
     await lsputil.linePatch(denops, 0, 0, insertText);
 
-    // No jumpable node
-    if (jumpableNodes.length === 0) {
-      return;
-    }
-
     // Calculate range each node
     await snippet.updateRange(cursor);
 
     // Jump to the first node
-    await jumpableNodes[0].jump();
-    if (jumpableNodes.length === 1 && jumpableNodes[0].tabstop === 0) {
-      return;
-    }
+    await jumpableNodes[0]?.jump();
     return new Snippet(denops, snippet, jumpableNodes, outer);
   }
 
