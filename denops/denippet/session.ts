@@ -63,7 +63,11 @@ export class Session {
     }
     let snippet: Snippet | undefined = this.snippet;
     while (snippet && !await snippet.jump(dir)) {
+      const range = snippet.snippet.range;
       snippet = snippet.outer;
+      if (snippet && range) {
+        snippet.currentNode().range = range;
+      }
     }
     if (snippet) {
       this.snippet = snippet;
