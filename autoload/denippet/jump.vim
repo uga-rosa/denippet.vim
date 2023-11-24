@@ -5,11 +5,14 @@
 function denippet#jump#move(position) abort
   let pos = [a:position.line + 1, a:position.character + 1]
 
+  let eventignore = &eventignore
   let cmd = ''
+  let cmd .= "\<Cmd>set eventignore=all\<CR>"
   if ['s', 'S', '']->index(mode()) >= 0
     let cmd .= "\<Esc>i"
   endif
   let cmd .= printf("\<Cmd>call cursor(%s, %s)\<CR>", pos[0], pos[1])
+  let cmd .= printf("\<Cmd>set eventignore=%s\<CR>", eventignore)
   call feedkeys(cmd, 'ni')
 endfunction
 
