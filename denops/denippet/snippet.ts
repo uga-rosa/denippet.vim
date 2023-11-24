@@ -92,7 +92,7 @@ export class Snippet {
     await this.snippet.updateRange(undefined, this.currentNode().tabstop);
     await op.eventignore.set(this.denops, eventignore);
     this.currentNode().range = range;
-    this.currentNode().setExtmark();
+    await this.currentNode().setExtmark();
   }
 
   jumpable(dir: Dir): boolean {
