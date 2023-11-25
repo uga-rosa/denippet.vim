@@ -5,5 +5,4 @@ export * as vim from "https://deno.land/x/denops_std@v5.0.2/function/vim/mod.ts"
 export * as op from "https://deno.land/x/denops_std@v5.0.2/option/mod.ts";
 export * as au from "https://deno.land/x/denops_std@v5.0.2/autocmd/mod.ts";
 export * as lambda from "https://deno.land/x/denops_std@v5.0.2/lambda/mod.ts";
-export { echoerr } from "https://deno.land/x/denops_std@v5.0.2/helper/mod.ts";
 export { batch } from "https://deno.land/x/denops_std@v5.0.2/batch/mod.ts";

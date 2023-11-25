@@ -1,5 +1,6 @@
 import { au, Denops } from "./deps/denops.ts";
 import { Dir, Snippet } from "./snippet.ts";
+import { echoerr } from "./util.ts";
 
 export class Session {
   snippet?: Snippet;
@@ -47,7 +48,8 @@ export class Session {
     }
     try {
       await this.snippet?.update();
-    } catch {
+    } catch (e) {
+      echoerr(this.denops, e);
       await this.drop();
     }
   }

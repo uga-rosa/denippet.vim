@@ -2,6 +2,17 @@ import { api, batch, Denops } from "./deps/denops.ts";
 import { LSP, lsputil } from "./deps/lsp.ts";
 import { NAMESPACE } from "./node.ts";
 
+export async function echoerr(
+  denops: Denops,
+  msg: string | Error,
+): Promise<void> {
+  await batch(denops, async (denops) => {
+    await denops.cmd("echohl Error");
+    await denops.cmd("echom l:msg", { msg: `${msg}` });
+    await denops.cmd("echohl None");
+  });
+}
+
 export async function asyncFilter<T>(
   array: T[],
   callback: (x: T) => Promise<boolean>,
