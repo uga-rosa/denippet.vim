@@ -1,4 +1,4 @@
-import { au, Denops, lambda, op } from "./deps/denops.ts";
+import { au, Denops, g, lambda, op } from "./deps/denops.ts";
 import { is, u } from "./deps/unknownutil.ts";
 import { lsputil } from "./deps/lsp.ts";
 import { getSnippets, load, NormalizedSnippet } from "./loader.ts";
@@ -44,6 +44,20 @@ async function searchSnippet(
   return bestMatch;
 }
 
+let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+function debounce(fn: () => Promise<void>, wait: number): () => void {
+  return () => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(async () => await fn(), wait);
+  };
+}
+
+async function forceUpdate(session?: Session): Promise<void> {
+  clearTimeout(timeoutId);
+  await session?.update();
+}
+
 export function main(denops: Denops): void {
   const session = new Session(denops);
 
@@ -82,6 +96,7 @@ export function main(denops: Denops): void {
       const body = u.ensure(bodyU, is.String);
       const prefix = u.ensure(prefixU, is.OptionalOf(is.String));
       if (await session.expand(body, prefix)) {
+        const waitTime = Number(await g.get(denops, "denippet_wait_time", 200));
         await au.group(denops, "denippet-session", (helper) => {
           const clearId = lambda.register(denops, async () => {
             await session.drop();
@@ -91,9 +106,12 @@ export function main(denops: Denops): void {
             "*:n",
             `call denops#notify('${denops.name}', '${clearId}', [])`,
           );
-          const updateId = lambda.register(denops, async () => {
-            await session.update();
-          });
+          const updateId = lambda.register(
+            denops,
+            debounce(async () => {
+              await session?.update();
+            }, waitTime),
+          );
           helper.define(
             "TextChangedI",
             "*",
@@ -113,6 +131,7 @@ export function main(denops: Denops): void {
       if (!session.snippet) {
         return;
       }
+      await forceUpdate();
       session.guard();
       await session.jump(dir);
       await denops.cmd("do InsertLeave");
