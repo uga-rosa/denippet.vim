@@ -1,5 +1,4 @@
 import { au, Denops } from "./deps/denops.ts";
-import { lsputil } from "./deps/lsp.ts";
 import { Dir, Snippet } from "./snippet.ts";
 
 export class Session {
@@ -63,13 +62,13 @@ export class Session {
     }
     let snippet: Snippet | undefined = this.snippet;
     while (snippet && !await snippet.jump(dir)) {
-      const range = snippet.snippet.range;
+      const innerSnippetNode = snippet.snippet;
       snippet = snippet.outer;
-      if (snippet && range) {
+      if (snippet && innerSnippetNode) {
         const node = snippet.currentNode();
-        node.range = range;
+        node.range = innerSnippetNode.range;
         if (node.type === "tabstop" || node.type === "placeholder") {
-          node.input = (await lsputil.getText(this.denops, 0, range)).join("\n");
+          node.input = await innerSnippetNode.getText();
         }
       }
     }
