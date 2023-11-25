@@ -174,7 +174,22 @@ export abstract class Jumpable extends Node {
       const replacement = splitLines(text);
       const originalText = await lsputil.getText(this.denops, 0, range);
       if (replacement.join("\n") !== originalText.join("\n")) {
+        const cursor = await lsputil.getCursor(this.denops);
         await lsputil.setText(this.denops, 0, range, replacement);
+        if (cursor.line === range.end.line && cursor.character >= range.end.character) {
+          const fixedCursor = replacement.length > 1
+            ? {
+              line: cursor.line - (range.end.line - range.start.line) + replacement.length - 1,
+              character: cursor.character - range.end.character +
+                replacement[replacement.length - 1].length,
+            }
+            : {
+              line: cursor.line - (range.end.line - range.start.line),
+              character: cursor.character - range.end.character + range.start.character +
+                replacement[0].length,
+            };
+          await lsputil.setCursor(this.denops, fixedCursor);
+        }
       }
     }
     this.range = newRange;
