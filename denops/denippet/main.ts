@@ -1,4 +1,4 @@
-import { au, Denops, g, lambda, op } from "./deps/denops.ts";
+import { au, Denops, fn, g, lambda, op } from "./deps/denops.ts";
 import { is, u } from "./deps/unknownutil.ts";
 import { lsputil } from "./deps/lsp.ts";
 import { getSnippets, load, NormalizedSnippet } from "./loader.ts";
@@ -145,7 +145,9 @@ export function main(denops: Denops): void {
       if (!session.snippet) {
         return;
       }
-      await forceUpdate();
+      if ((await fn.mode(denops))[0] === "i") {
+        await forceUpdate();
+      }
       session.guard();
       await session.jump(dir);
       await denops.cmd("do InsertLeave");
