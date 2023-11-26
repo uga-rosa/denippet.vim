@@ -16,8 +16,8 @@ SNIPPET GRAMMAR					|denippet-snippet-grammar|
 ==============================================================================
 INTRODUCTION					*denippet-introduction*
 
-Denippet is a Neovim snippet plugin extended from VSCode's snippets. With the
-adoption of the denops ecosystem, it has overcome the weaknesses found in
+Denippet is a Vim/Neovim snippet plugin extended from VSCode's snippets. With
+the adoption of the denops ecosystem, it has overcome the weaknesses found in
 existing snippet plugins, such as those related to JavaScript regular
 expressions. Additionally, it allows the use of TypeScript functions, which
 means you can easily create snippets using powerful assets like date
@@ -25,8 +25,6 @@ libraries.
 
 Requirements
 	- denops.vim: https://github.com/vim-denops/denops.vim
-	- Neovim: While there are plans to support Vim in the future, it is
-		  currently exclusive to Neovim.
 
 
 ==============================================================================
