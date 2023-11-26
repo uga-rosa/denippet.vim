@@ -1,10 +1,9 @@
-import { api, Denops } from "./deps/denops.ts";
+import { Denops } from "./deps/denops.ts";
 import { LSP, lsputil } from "./deps/lsp.ts";
 import { camelcase } from "./deps/camelcase.ts";
 import { splitLines } from "./util.ts";
 import * as V from "./variable.ts";
-
-export const NAMESPACE = "denippet_jumpable_node";
+import { clearExtmark, getExtmarks, setExtmark } from "./extmark.ts";
 
 export type NodeType =
   | "snippet"
@@ -121,42 +120,13 @@ function shiftRange(range: LSP.Range, start: LSP.Position): LSP.Range {
 export abstract class Jumpable extends Node {
   input?: string;
   copy?: Jumpable;
-  extmarkId?: number;
   abstract tabstop: number;
   abstract getPriority(): number;
 
-  #nsId?: number;
-  async nsId(): Promise<number> {
-    if (this.#nsId == null) {
-      this.#nsId = await api.nvim_create_namespace(
-        this.denops,
-        NAMESPACE,
-      ) as number;
-    }
-    return this.#nsId;
-  }
-
   // Fire on TextChangedI
   async updateInput(): Promise<void> {
-    if (this.extmarkId == null) {
-      return;
-    }
-    const [
-      row,
-      col,
-      { end_row, end_col },
-    ] = await api.nvim_buf_get_extmark_by_id(
-      this.denops,
-      0,
-      await this.nsId(),
-      this.extmarkId,
-      { details: true },
-    ) as [number, number, { end_row: number; end_col: number }];
-    if (row == null) {
-      // Invalid extmark id
-      return;
-    }
-    const range8 = lsputil.createRange(row, col, end_row, end_col);
+    const extmarks = await getExtmarks(this.denops);
+    const range8 = extmarks[0].range;
     const range16 = await lsputil.toUtf16Range(this.denops, 0, range8, "utf-8");
     const lines = await lsputil.getText(this.denops, 0, range16);
     this.range = range16;
@@ -197,35 +167,18 @@ export abstract class Jumpable extends Node {
   }
 
   async setExtmark(): Promise<void> {
-    if (!this.range) {
-      throw new Error("Internal error: Node.Jumpable.setExtmark");
+    if (this.range == null) {
+      throw new Error("Internal error: Node.Jumpable.setMark");
     }
-    await this.clear();
-    this.extmarkId = await api.nvim_buf_set_extmark(
-      this.denops,
-      0,
-      await this.nsId(),
-      this.range.start.line,
-      this.range.start.character,
-      {
-        end_row: this.range.end.line,
-        end_col: this.range.end.character,
-        right_gravity: false,
-        end_right_gravity: true,
-      },
-    ) as number;
-  }
-
-  async clear(): Promise<void> {
-    const nsId = await this.nsId();
-    await api.nvim_buf_clear_namespace(this.denops, 0, nsId, 0, -1);
+    await clearExtmark(this.denops);
+    await setExtmark(this.denops, this.range);
   }
 
   async jump(): Promise<void> {
     if (!this.range) {
       throw new Error("Internal error: Node.Jumpable.jump");
     }
-    await this.clear();
+    await clearExtmark(this.denops);
     await this.setExtmark();
     const range = await lsputil.toUtf8Range(this.denops, 0, this.range, "utf-16");
     if (isSamePosition(range.start, range.end)) {
