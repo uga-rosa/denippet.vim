@@ -97,7 +97,7 @@ export function main(denops: Denops): void {
           helper.define(
             "TextChangedI",
             "*",
-            `call denops#notify('${denops.name}', '${updateId}', [])`,
+            `call denops#request('${denops.name}', '${updateId}', [])`,
           );
         });
       }
