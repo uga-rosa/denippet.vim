@@ -1,6 +1,8 @@
-" original code is from vim-vsnip
-" https://github.com/hrsh7th/vim-vsnip/blob/7753ba9c10429c29d25abfd11b4c60b76718c438/autoload/vsnip/session.vim
 " Copyright (c) 2019 hrsh7th
+" Released under the MIT license
+" https://github.com/hrsh7th/vim-vsnip/blob/7753ba9c10429c29d25abfd11b4c60b76718c438/LICENSE
+" Original code is here
+" https://github.com/hrsh7th/vim-vsnip/blob/7753ba9c10429c29d25abfd11b4c60b76718c438/autoload/vsnip/session.vim
 
 function denippet#jump#move(position) abort
   let pos = [a:position.line + 1, a:position.character + 1]
