@@ -3,9 +3,6 @@ if exists('g:loaded_denippet')
 endif
 let g:loaded_denippet = 1
 
-" Configuration
-let g:denippet_wait_time = get(g:, 'denippet_wait_time', 200)
-
 inoremap <Plug>(denippet-expand) <Cmd>call denippet#expand()<CR>
 inoremap <Plug>(denippet-expand-or-jump) <Cmd>call <SID>expand_or_jump()<CR>
 function s:expand_or_jump() abort

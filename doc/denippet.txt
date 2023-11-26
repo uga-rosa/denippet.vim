@@ -9,7 +9,6 @@ CONTENTS					*denippet-contents*
 INTRODUCTION					|denippet-introduction|
 COMMANDS					|denippet-commands|
 FUNCTIONS					|denippet-functions|
-VARIABLES					|denippet-variables|
 SNIPPET GRAMMAR					|denippet-snippet-grammar|
 
 ==============================================================================
@@ -97,16 +96,6 @@ denippet#choosable([{dir}])				*denippet#choosable()*
 denippet#choice([{dir}])				*denippet#choice()*
 	{dir} where 1 means "next" and -1 means "previous".
 	Same as |<Plug>(denippet-choice-next)| and |<Plug>(denippet-choice-prev)|.
-
-
-==============================================================================
-VARIABLES						*denippet-variables*
-
-							*g:denippet_wait_time*
-g:denippet_wait_time	(default: 200 ms)
-	Waiting time between insert a char within a tabstop and when changes
-	to that copy node are reflected in the buffer. Set it according to
-	your typing speed.
 
 
 ==============================================================================
