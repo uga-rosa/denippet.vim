@@ -49,14 +49,11 @@ export function main(denops: Denops): void {
 
   let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
-  function debounce(
-    fn: () => Promise<void>,
-    wait: number,
-  ): void {
+  function debounceUpdate(syncDelay: number): void {
     clearTimeout(timeoutId);
     timeoutId = setTimeout(async () => {
       const id = lambda.register(denops, async () => {
-        await fn();
+        await session.update();
         return true;
       });
       await denops.call(
@@ -65,7 +62,7 @@ export function main(denops: Denops): void {
         `denops#request('${denops.name}', '${id}', [])`,
         1,
       );
-    }, wait);
+    }, syncDelay);
   }
 
   async function forceUpdate(): Promise<void> {
@@ -120,18 +117,20 @@ export function main(denops: Denops): void {
             "*:n",
             `call denops#notify('${denops.name}', '${clearId}', [])`,
           );
-          const updateId = lambda.register(denops, async () => {
-            if (syncDelay === 0) {
-              await session.update();
-            } else if (syncDelay > 0) {
-              debounce(async () => await session.update(), syncDelay);
-            }
-          });
-          helper.define(
-            "TextChangedI",
-            "*",
-            `call denops#request('${denops.name}', '${updateId}', [])`,
-          );
+          if (syncDelay >= 0) {
+            const updateId = lambda.register(denops, async () => {
+              if (syncDelay === 0) {
+                await session.update();
+              } else if (syncDelay > 0) {
+                debounceUpdate(syncDelay);
+              }
+            });
+            helper.define(
+              "TextChangedI",
+              "*",
+              `call denops#request('${denops.name}', '${updateId}', [])`,
+            );
+          }
         });
       }
     },
