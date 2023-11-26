@@ -3,6 +3,8 @@ if exists('g:loaded_denippet')
 endif
 let g:loaded_denippet = 1
 
+let g:denippet_sync_delay = get(g:, 'denippet_sync_delay', 0)
+
 inoremap <Plug>(denippet-expand) <Cmd>call denippet#expand()<CR>
 inoremap <Plug>(denippet-expand-or-jump) <Cmd>call <SID>expand_or_jump()<CR>
 function s:expand_or_jump() abort

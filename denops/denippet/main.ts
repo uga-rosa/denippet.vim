@@ -1,4 +1,4 @@
-import { au, Denops, lambda, op } from "./deps/denops.ts";
+import { au, Denops, g, lambda, op } from "./deps/denops.ts";
 import { is, u } from "./deps/unknownutil.ts";
 import { lsputil } from "./deps/lsp.ts";
 import { getSnippets, load, NormalizedSnippet } from "./loader.ts";
@@ -47,6 +47,32 @@ async function searchSnippet(
 export function main(denops: Denops): void {
   const session = new Session(denops);
 
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+  function debounce(
+    fn: () => Promise<void>,
+    wait: number,
+  ): void {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(async () => {
+      const id = lambda.register(denops, async () => {
+        await fn();
+        return true;
+      });
+      await denops.call(
+        "denippet#wait#wait",
+        -1,
+        `denops#request('${denops.name}', '${id}', [])`,
+        1,
+      );
+    }, wait);
+  }
+
+  async function forceUpdate(): Promise<void> {
+    clearTimeout(timeoutId);
+    await session.update();
+  }
+
   denops.dispatcher = {
     async load(
       filepathU: unknown,
@@ -82,8 +108,11 @@ export function main(denops: Denops): void {
       const body = u.ensure(bodyU, is.String);
       const prefix = u.ensure(prefixU, is.OptionalOf(is.String));
       if (await session.expand(body, prefix)) {
+        const syncDelay = Number(await g.get(denops, "denippet_sync_delay"));
+
         await au.group(denops, "denippet-session", (helper) => {
           const clearId = lambda.register(denops, async () => {
+            await forceUpdate();
             await session.drop();
           });
           helper.define(
@@ -92,7 +121,11 @@ export function main(denops: Denops): void {
             `call denops#notify('${denops.name}', '${clearId}', [])`,
           );
           const updateId = lambda.register(denops, async () => {
-            await session.update();
+            if (syncDelay === 0) {
+              await session.update();
+            } else if (syncDelay > 0) {
+              debounce(async () => await session.update(), syncDelay);
+            }
           });
           helper.define(
             "TextChangedI",
@@ -113,6 +146,7 @@ export function main(denops: Denops): void {
       if (!session.snippet) {
         return;
       }
+      await forceUpdate();
       session.guard();
       await session.jump(dir);
       await denops.cmd("do InsertLeave");

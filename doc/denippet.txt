@@ -9,7 +9,9 @@ CONTENTS					*denippet-contents*
 INTRODUCTION					|denippet-introduction|
 COMMANDS					|denippet-commands|
 FUNCTIONS					|denippet-functions|
+VARIABLES					|denippet-variables|
 SNIPPET GRAMMAR					|denippet-snippet-grammar|
+
 
 ==============================================================================
 INTRODUCTION					*denippet-introduction*
@@ -25,6 +27,7 @@ Requirements
 	- denops.vim: https://github.com/vim-denops/denops.vim
 	- Neovim: While there are plans to support Vim in the future, it is
 		  currently exclusive to Neovim.
+
 
 ==============================================================================
 MAPPINGS					*denippet-mappings*
@@ -96,6 +99,20 @@ denippet#choosable([{dir}])				*denippet#choosable()*
 denippet#choice([{dir}])				*denippet#choice()*
 	{dir} where 1 means "next" and -1 means "previous".
 	Same as |<Plug>(denippet-choice-next)| and |<Plug>(denippet-choice-prev)|.
+
+
+==============================================================================
+VARIABLES						*denippet-variables*
+
+						*g:denippet_sync_delay*
+g:denippet_sync_delay ~
+	Specify delay time to sync same tabstop placeholder.
+
+	-1: No sync (update only on |denippet#jump()| or |InsertLeave|)
+	 0: Always sync
+	 N: Debounce N milliseconds (N > 0)
+
+	Default: 0
 
 
 ==============================================================================
