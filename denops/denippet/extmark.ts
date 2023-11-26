@@ -58,7 +58,6 @@ export async function setExtmark(
 }
 
 type Extmark = {
-  nsId: number;
   extmarkId: number;
   range: LSP.Range;
 };
@@ -84,7 +83,6 @@ export async function getExtmarks(
       { end_row: number; end_col: number },
     ][];
     return extmarks.map((mark) => ({
-      nsId,
       extmarkId: mark[0],
       range: lsputil.createRange(mark[1], mark[2], mark[3].end_row, mark[3].end_col),
     }));
@@ -116,7 +114,7 @@ export async function getExtmarks(
         }) as typeof props[number];
       }
       const range = { start, end: { line: prop.lnum - 1, character: prop.col + prop.length - 1 } };
-      extmarks.push({ nsId: -1, extmarkId: prop.id, range });
+      extmarks.push({ extmarkId: prop.id, range });
     }
     return extmarks;
   }
