@@ -46,6 +46,7 @@ export class Session {
     await au.group(this.denops, "denippet-session", (helper) => {
       helper.remove(["ModeChanged", "TextChangedI"]);
     });
+    await clearExtmark(this.denops);
   }
 
   async update(): Promise<void> {
