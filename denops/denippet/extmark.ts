@@ -21,7 +21,7 @@ async function ensurePropType(denops: Denops): Promise<string> {
 
 export async function setExtmark(
   denops: Denops,
-  range: LSP.Range,
+  range: LSP.Range, // utf8 offset, 0-index
   extmarkId?: number,
 ): Promise<void> {
   if (denops.meta.host === "nvim") {
@@ -59,7 +59,7 @@ export async function setExtmark(
 
 type Extmark = {
   extmarkId: number;
-  range: LSP.Range;
+  range: LSP.Range; // utf8 offset, 0-index
 };
 
 export async function getExtmarks(
@@ -67,7 +67,7 @@ export async function getExtmarks(
   lnum?: number,
 ): Promise<Extmark[]> {
   if (denops.meta.host === "nvim") {
-    const range = lnum == null ? [0, -1] : [[lnum, 0], [lnum + 1, 0]];
+    const range = lnum == null ? [0, -1] : [[lnum, 0], [lnum, -1]];
     const nsId = await ensureNsId(denops);
     const extmarks = await api.nvim_buf_get_extmarks(
       denops,

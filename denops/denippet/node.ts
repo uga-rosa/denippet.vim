@@ -171,7 +171,8 @@ export abstract class Jumpable extends Node {
       throw new Error("Internal error: Node.Jumpable.setMark");
     }
     await clearExtmark(this.denops);
-    await setExtmark(this.denops, this.range);
+    const range = await lsputil.toUtf8Range(this.denops, 0, this.range, "utf-16");
+    await setExtmark(this.denops, range);
   }
 
   async jump(): Promise<void> {

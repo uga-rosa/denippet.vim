@@ -25,6 +25,11 @@ export function splitLines(text: string): [string, ...string[]] {
   return text.replaceAll(/\r\n?/g, "\n").split("\n") as [string, ...string[]];
 }
 
+const ENCODER = new TextEncoder();
+function byteLength(str: string): number {
+  return ENCODER.encode(str).length;
+}
+
 /**
  * Fix extmarks position
  *
@@ -44,19 +49,20 @@ export async function linePatch(
   after: number,
   insertText: string,
 ): Promise<void> {
-  const cursor = await lsputil.getCursor(denops);
+  const cursor16 = await lsputil.getCursor(denops);
+  const cursor = await lsputil.toUtf8Position(denops, 0, cursor16, "utf-16");
   const lines = splitLines(insertText);
 
   function shift(pos: LSP.Position): LSP.Position {
     if (lines.length > 1) {
       return {
         line: pos.line + lines.length - 1,
-        character: lines[lines.length - 1].length + pos.character - cursor.character - after,
+        character: byteLength(lines[lines.length - 1]) + pos.character - cursor.character - after,
       };
     } else {
       return {
         line: pos.line,
-        character: pos.character - before - after + insertText.length,
+        character: pos.character - before - after + byteLength(insertText),
       };
     }
   }
