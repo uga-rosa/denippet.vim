@@ -124,12 +124,18 @@ export abstract class Jumpable extends Node {
   abstract getPriority(): number;
 
   // Fire on TextChangedI
-  async updateInput(): Promise<void> {
-    const extmarks = await getExtmarks(this.denops);
-    const range8 = extmarks[0].range;
-    const range16 = await lsputil.toUtf16Range(this.denops, 0, range8, "utf-8");
-    const lines = await lsputil.getText(this.denops, 0, range16);
-    this.range = range16;
+  async updateInput(range?: LSP.Range): Promise<void> {
+    if (range != null) {
+      this.range = range;
+    } else {
+      const extmarks = await getExtmarks(this.denops);
+      if (extmarks.length === 0) {
+        throw new Error("Internal error: Node.Jumpable.updateInput");
+      }
+      const range8 = extmarks[0].range;
+      this.range = await lsputil.toUtf16Range(this.denops, 0, range8, "utf-8");
+    }
+    const lines = await lsputil.getText(this.denops, 0, this.range);
     this.input = lines.join("\n");
   }
 

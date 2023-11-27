@@ -1,4 +1,5 @@
 import { au, Denops } from "./deps/denops.ts";
+import { clearExtmark } from "./extmark.ts";
 import { Dir, Snippet } from "./snippet.ts";
 import { echoerr } from "./util.ts";
 
@@ -20,6 +21,11 @@ export class Session {
       return true;
     } else {
       // No jumpable nodes or only $0
+      await clearExtmark(this.denops);
+      if (this.snippet != null) {
+        await this.snippet.currentNode().updateInput(snippet.snippet.range);
+        await this.snippet.currentNode().setExtmark();
+      }
       return false;
     }
   }
