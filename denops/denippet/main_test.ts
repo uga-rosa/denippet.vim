@@ -141,6 +141,12 @@ test({
         maps: [map.choicePrev],
         expectBuffer: ["baz|"],
       },
+      {
+        name: "nested placeholders",
+        body: "console.log($1${2:, $1})",
+        maps: ["foo"],
+        expectBuffer: ["console.log(foo|, foo)"],
+      },
     ];
 
     for (const spec of specs) {
