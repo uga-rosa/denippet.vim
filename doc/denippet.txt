@@ -7,7 +7,7 @@ License: MIT License
 CONTENTS					*denippet-contents*
 
 INTRODUCTION					|denippet-introduction|
-COMMANDS					|denippet-commands|
+MAPPINGS					|denippet-mappings|
 FUNCTIONS					|denippet-functions|
 VARIABLES					|denippet-variables|
 SNIPPET GRAMMAR					|denippet-snippet-grammar|
