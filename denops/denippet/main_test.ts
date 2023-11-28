@@ -19,7 +19,7 @@ async function input(
   if (is.String(body)) {
     cmd = cmd.replace("<body>", `'${body}'`);
   } else {
-    body = "[" + body.map((b) => `'${b}'`).join(" ,") + "]";
+    body = "[" + body.map((b) => `'${b}'`).join(",") + "]";
     cmd = cmd.replace("<body>", `${body}`);
   }
   for (const map of maps) {
@@ -31,6 +31,14 @@ async function input(
   await denops.cmd(`call feedkeys("${cmd}", 'x')`);
   await denops.cmd("do ModeChanged *:n");
 }
+
+const map = {
+  expand: "\\<Cmd>call denippet#expand()\\<CR>",
+  jumpNext: "\\<Cmd>call denippet#jump(+1)\\<CR>",
+  jumpPrev: "\\<Cmd>call denippet#jump(-1)\\<CR>",
+  choiceNext: "\\<Cmd>call denippet#choice(+1)\\<CR>",
+  choicePrev: "\\<Cmd>call denippet#choice(-1)\\<CR>",
+};
 
 function parseBuffer(
   buffer: string[],
@@ -51,14 +59,6 @@ type Spec = {
   body: string | string[];
   maps: string[];
   expectBuffer: string[];
-};
-
-const map = {
-  expand: "\\<Cmd>call denippet#expand()\\<CR>",
-  jumpNext: "\\<Cmd>call denippet#jump(+1)\\<CR>",
-  jumpPrev: "\\<Cmd>call denippet#jump(-1)\\<CR>",
-  choiceNext: "\\<Cmd>call denippet#choice(+1)\\<CR>",
-  choicePrev: "\\<Cmd>call denippet#choice(-1)\\<CR>",
 };
 
 test({
@@ -128,6 +128,18 @@ test({
         body: "あ$1う$2お",
         maps: ["い", map.jumpNext, "え"],
         expectBuffer: ["あいうえ|お"],
+      },
+      {
+        name: "choiceNext",
+        body: "${1|foo,bar,baz|}",
+        maps: [map.choiceNext, map.choiceNext],
+        expectBuffer: ["baz|"],
+      },
+      {
+        name: "choicePrev (loop)",
+        body: "${1|foo,bar,baz|}",
+        maps: [map.choicePrev],
+        expectBuffer: ["baz|"],
       },
     ];
 
