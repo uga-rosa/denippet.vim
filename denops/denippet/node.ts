@@ -145,7 +145,7 @@ export abstract class Jumpable extends Node {
   ): Promise<LSP.Position> {
     const text = await this.getText(tabstop);
     const newRange = calcRange(start, text);
-    if (this.copy != null && this.range != null) {
+    if ((this.type === "choice" || this.copy != null) && this.range != null) {
       const range = shiftRange(this.range, start);
       const replacement = splitLines(text);
       const originalText = await lsputil.getText(this.denops, 0, range);
@@ -169,6 +169,9 @@ export abstract class Jumpable extends Node {
       }
     }
     this.range = newRange;
+    if (this.type === "choice") {
+      await this.setExtmark();
+    }
     return this.range.end;
   }
 
@@ -188,7 +191,9 @@ export abstract class Jumpable extends Node {
     await clearExtmark(this.denops);
     await this.setExtmark();
     const range = await lsputil.toUtf8Range(this.denops, 0, this.range, "utf-16");
-    if (isSamePosition(range.start, range.end)) {
+    if (this.type === "choice") {
+      await this.denops.call("denippet#jump#move", range.end);
+    } else if (isSamePosition(range.start, range.end)) {
       await this.denops.call("denippet#jump#move", range.start);
     } else {
       await this.denops.call("denippet#jump#select", range);
