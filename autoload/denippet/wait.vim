@@ -4,10 +4,12 @@
 " Original code is here
 " https://github.com/vim-denops/denops.vim/blob/6c7ebef6f71b948a152c09bd844fba00f8fee3d6/autoload/denops/_internal/wait.vim
 
+function denippet#wait#wait(timeout, condition, interval) abort
+  call s:wait(a:timeout, a:condition, a:interval)
+endfunction
+
 if exists('*wait')
-  function denippet#wait#wait(...) abort
-    call call('wait', a:000)
-  endfunction
+  let s:wait = function('wait')
 else
   " NOTE:
   " The line 'call getchar(0)' is required to enable Ctrl-C
@@ -18,7 +20,7 @@ else
     execute printf('sleep %dm', a:duration)
   endfunction
 
-  function! denippet#wait#wait(timeout, condition, interval) abort
+  function! s:wait(timeout, condition, interval) abort
     let l:s = reltime()
     try
       while !a:condition()
