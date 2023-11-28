@@ -100,7 +100,7 @@ denippet#choice([{dir}])				*denippet#choice()*
 
 
 ==============================================================================
-VARIABLES						*denippet-variables*
+VARIABLES					*denippet-variables*
 
 						*g:denippet_sync_delay*
 g:denippet_sync_delay ~
@@ -287,6 +287,13 @@ Example					Output				Explanation
 "${TM_FILENAME/[\\.-]/_/g}"		example_123_456_TEST_js		Replace each . or - with _
 "${TM_FILENAME/(.*)/${1:/upcase}/}"	EXAMPLE-123.456-TEST.JS		Change to all uppercase
 "${TM_FILENAME/[^0-9^a-z]//gi}"		example123456TESTjs		Remove non-alphanumeric characters
+
+
+==============================================================================
+UTILITIES					*denippet-utilities*
+
+json schema ~
+	https://github.com/uga-rosa/denippet.vim/blob/main/schemas/snippet.json
 
 
 ==============================================================================
