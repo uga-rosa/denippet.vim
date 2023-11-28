@@ -95,11 +95,7 @@ test({
       {
         name: "multi line",
         body: ["if ($1) {", "\t$0", "}"],
-        maps: [
-          "foo",
-          map.jumpNext,
-          "bar",
-        ],
+        maps: ["foo", map.jumpNext, "bar"],
         expectBuffer: ["if (foo) {", "\tbar|", "}"],
       },
       {
