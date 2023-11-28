@@ -102,7 +102,10 @@ export function main(denops: Denops): void {
     },
 
     async anonymous(bodyU: unknown, prefixU: unknown): Promise<void> {
-      const body = u.ensure(bodyU, is.String);
+      let body = u.ensure(bodyU, is.OneOf([is.String, is.ArrayOf(is.String)]));
+      if (is.ArrayOf(is.String)(body)) {
+        body = body.join("\n");
+      }
       const prefix = u.ensure(prefixU, is.OptionalOf(is.String));
       if (await session.expand(body, prefix)) {
         const syncDelay = Number(await g.get(denops, "denippet_sync_delay"));
