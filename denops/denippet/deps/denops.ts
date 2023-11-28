@@ -7,3 +7,5 @@ export { g } from "https://deno.land/x/denops_std@v5.0.2/variable/variable.ts";
 export * as au from "https://deno.land/x/denops_std@v5.0.2/autocmd/mod.ts";
 export * as lambda from "https://deno.land/x/denops_std@v5.0.2/lambda/mod.ts";
 export { batch } from "https://deno.land/x/denops_std@v5.0.2/batch/mod.ts";
+
+export { test } from "https://deno.land/x/denops_test@v1.4.0/mod.ts";
