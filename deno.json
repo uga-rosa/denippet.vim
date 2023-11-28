@@ -2,5 +2,11 @@
   "lock": false,
   "fmt": {
     "lineWidth": 100
+  },
+  "tasks": {
+    "pre-commit": "deno task fmt && deno task check && deno task test",
+    "fmt": "deno fmt **/*.ts",
+    "check": "deno check **/*.ts && deno fmt --check **/*.ts && deno lint",
+    "test": "deno test -A",
   }
 }
