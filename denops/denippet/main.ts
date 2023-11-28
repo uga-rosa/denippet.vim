@@ -115,7 +115,7 @@ export function main(denops: Denops): void {
           helper.define(
             "ModeChanged",
             "*:n",
-            `call denops#notify('${denops.name}', '${clearId}', [])`,
+            `call denops#request('${denops.name}', '${clearId}', [])`,
           );
           if (syncDelay >= 0) {
             const updateId = lambda.register(denops, async () => {
