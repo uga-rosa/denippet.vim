@@ -1,0 +1,60 @@
+name: integration
+
+env:
+  DENO_VERSION: 1.x
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - '**/*.ts'
+      - '.github/workflows/integration.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '**/*.ts'
+      - '.github/workflows/integration.yml'
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: denoland/setup-deno@v1
+        with:
+          deno-version: ${{ env.DENO_VERSION }}
+
+      - name: Check
+        run: deno task check
+
+  test:
+    strategy:
+      matrix:
+        runner:
+          - ubuntu-latest
+          - windows-latest
+          - macos-latest
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          path: "./repo"
+      - uses: actions/checkout@v3
+        with:
+          repository: "vim-denops/denops.vim"
+          path: "./denops.vim"
+      - uses: denoland/setup-deno@v1
+        with:
+          deno-version: ${{ env.DENO_VERSION }}
+      - uses: rhysd/action-setup-vim@v1
+      - uses: rhysd/action-setup-vim@v1
+        with:
+          neovim: true
+      - name: Test
+        run: deno task test
+        env:
+          DENOPS_TEST_DENOPS_PATH: "../denops.vim"
+        working-directory: ./repo
