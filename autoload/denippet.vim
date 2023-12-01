@@ -42,8 +42,13 @@ function denippet#choice(dir) abort
   call s:request('choice', [a:dir])
 endfunction
 
-function denippet#get_complete_items() abort
-  return s:request('getCompleteItems')
+function s:to_boolean(x) abort
+  return a:x ? v:true : v:false
+endfunction
+
+function denippet#get_complete_items(...) abort
+  let from_normal = a:0 > 0 ? a:1 : mode() ==# 'n'
+  return s:request('getCompleteItems', [s:to_boolean(from_normal)])
 endfunction
 
 function denippet#to_string(body) abort

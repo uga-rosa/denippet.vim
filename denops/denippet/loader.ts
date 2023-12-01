@@ -74,6 +74,7 @@ function setSnippets(
 export async function getSnippets(
   denops: Denops,
   ft: string,
+  fromNormal: boolean,
 ): Promise<NormalizedSnippet[]> {
   const snippets = [
     ...Cell[ft] ?? [],
@@ -85,9 +86,9 @@ export async function getSnippets(
     } else if (isIfFunc(snippet.if)) {
       return Boolean(await snippet.if(denops));
     } else if (snippet.if === "base") {
-      return Boolean(await denops.call("denippet#load#base"));
+      return Boolean(await denops.call("denippet#load#base", fromNormal));
     } else if (snippet.if === "start") {
-      return Boolean(await denops.call("denippet#load#start"));
+      return Boolean(await denops.call("denippet#load#start", fromNormal));
     } else if (!snippet.eval) {
       return false;
     } else if (snippet.if === "vimscript") {

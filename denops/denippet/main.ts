@@ -30,7 +30,7 @@ async function searchSnippet(
 
   let bestMatch: SearchResult = {};
   const filetype = await op.filetype.get(denops);
-  (await getSnippets(denops, filetype)).forEach((snippet) => {
+  (await getSnippets(denops, filetype, false)).forEach((snippet) => {
     snippet.prefix.forEach((prefix) => {
       if (
         lineBeforeCursor.endsWith(prefix) &&
@@ -166,9 +166,10 @@ export function main(denops: Denops): void {
       await session.choice(dir);
     },
 
-    async getCompleteItems(): Promise<CompleteItem[]> {
+    async getCompleteItems(fromNormalU: unknown): Promise<CompleteItem[]> {
+      const fromNormal = u.ensure(fromNormalU, is.Boolean);
       const filetype = await op.filetype.get(denops);
-      return (await getSnippets(denops, filetype)).flatMap((snippet) =>
+      return (await getSnippets(denops, filetype, fromNormal)).flatMap((snippet) =>
         snippet.prefix.map((prefix) => ({
           word: prefix,
           kind: "Snippet",
