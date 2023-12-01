@@ -61,7 +61,7 @@ MAPPINGS					*denippet-mappings*
 ==============================================================================
 FUNCTIONS					*denippet-functions*
 
-denippet#load({filepath}, [{filetype}...])		*denippet#load()*
+denippet#load({filepath} [, {filetype}...])		*denippet#load()*
 	Load the snippet definition file.
 
 	Multiple filetypes can be specified.
