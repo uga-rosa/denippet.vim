@@ -86,9 +86,9 @@ export async function getSnippets(
     } else if (isIfFunc(snippet.if)) {
       return Boolean(await snippet.if(denops));
     } else if (snippet.if === "base") {
-      return Boolean(await denops.call("denippet#load#base", fromNormal));
+      return Boolean(await denops.call("denippet#load#base", snippet.prefix, fromNormal));
     } else if (snippet.if === "start") {
-      return Boolean(await denops.call("denippet#load#start", fromNormal));
+      return Boolean(await denops.call("denippet#load#start", snippet.prefix, fromNormal));
     } else if (!snippet.eval) {
       return false;
     } else if (snippet.if === "vimscript") {
