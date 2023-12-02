@@ -24,8 +24,10 @@ export class Source extends BaseSource<Params> {
   async gather({
     denops,
   }: GatherArguments<Params>): Promise<DdcGatherItems> {
-    return await denops.call(
-      "denippet#get_complete_items",
+    return await denops.dispatch(
+      "denippet",
+      "getCompleteItems",
+      false,
     ) as Item<UserData>[];
   }
 
@@ -71,8 +73,9 @@ export class Source extends BaseSource<Params> {
     denops: Denops,
     body: string,
   ): Promise<string> {
-    return await denops.call(
-      "denippet#to_string",
+    return await denops.dispatch(
+      "denippet",
+      "snippetToString",
       body,
     ) as string;
   }
