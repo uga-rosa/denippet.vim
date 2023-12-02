@@ -39,6 +39,23 @@ const isTSSnippet = is.ObjectOf({
 
 export type TSSnippet = u.PredicateType<typeof isTSSnippet>;
 
+// For compatibility with VSCode global snippet files (*.code-snippets)
+const isGlobalSnippet = is.ObjectOf({
+  prefix: is.OptionalOf(isStringOrArray),
+  body: isStringOrArray,
+  description: is.OptionalOf(is.String),
+  scope: is.OptionalOf(is.String),
+});
+
+export type GlobalSnippet = u.PredicateType<typeof isGlobalSnippet>;
+
+function langToFt(lang: string): string {
+  return {
+    csharp: "cs",
+    shellscript: "sh",
+  }[lang] ?? lang;
+}
+
 export type NormalizedSnippet = {
   name: string;
   prefix: string[];
@@ -105,21 +122,8 @@ export async function load(
 ): Promise<void> {
   const extension = filepath.split(".").pop()!;
   let snippets: NormalizedSnippet[] = [];
-  if (["json", "toml", "yaml"].includes(extension)) {
-    const raw = await Deno.readTextFile(filepath);
-    const content = extension === "json"
-      ? JSON.parse(raw)
-      : extension === "toml"
-      ? TOML.parse(raw)
-      : YAML.parse(raw);
-    u.assert(content, is.RecordOf(isRawSnippet));
-    snippets = Object.entries(content).map(([name, snip]) => ({
-      ...snip,
-      name,
-      prefix: toArray(snip.prefix ?? name),
-      body: toString(snip.body),
-    }));
-  } else if (extension === "ts") {
+
+  if (extension === "ts") {
     const content = await import(filepath).then((module) => module.snippets);
     u.assert(content, is.RecordOf(isTSSnippet));
     snippets = Object.entries(content).map(([name, snip]) => ({
@@ -133,7 +137,37 @@ export async function load(
       },
     }));
   } else {
-    throw new Error(`Unknown extension: ${extension}`);
+    const raw = await Deno.readTextFile(filepath);
+    if (["json", "toml", "yaml"].includes(extension)) {
+      const content = (extension === "json")
+        ? JSON.parse(raw)
+        : extension === "toml"
+        ? TOML.parse(raw)
+        : YAML.parse(raw);
+      u.assert(content, is.RecordOf(isRawSnippet));
+      snippets = Object.entries(content).map(([name, snip]) => ({
+        ...snip,
+        name,
+        prefix: toArray(snip.prefix ?? name),
+        body: toString(snip.body),
+      }));
+    } else if (extension === "code-snippets") {
+      const content = JSON.parse(raw);
+      u.assert(content, is.RecordOf(isGlobalSnippet));
+      for (const [name, snippet] of Object.entries(content)) {
+        const ft = snippet.scope ? snippet.scope.split(",").map(langToFt) : "*";
+        const snip = {
+          ...snippet,
+          name,
+          prefix: toArray(snippet.prefix ?? name),
+          body: toString(snippet.body),
+        };
+        setSnippets(ft, [snip]);
+      }
+      return;
+    } else {
+      throw new Error(`Unknown extension: ${extension}`);
+    }
   }
 
   setSnippets(filetype, snippets);
