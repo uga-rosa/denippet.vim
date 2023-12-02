@@ -135,6 +135,9 @@ follows: >json
 	  }
 	}
 <
+NOTE: For compatibility with VSCode, files with the code-snippets extension
+can also be read, and the scope field is respected.
+
 Fields ~
 	"prefix"	(string|string[])
 		The trigger that expands the snippet. If ommited, the name
