@@ -147,6 +147,18 @@ test({
         maps: ["foo"],
         expectBuffer: ["console.log(foo|, foo)"],
       },
+      {
+        name: "regex (update on InsertLeave)",
+        body: "$1 ${1/(.)(.)(.)/$3$2$1/}",
+        maps: ["abc", "\\<Esc>"],
+        expectBuffer: ["abc| cba"],
+      },
+      {
+        name: "regex (update on jump)",
+        body: "$1 ${1/(.)(.)(.)/$3$2$1/} $2",
+        maps: ["abc", map.jumpNext, "foo"],
+        expectBuffer: ["abc cba foo|"],
+      },
     ];
 
     for (const spec of specs) {
