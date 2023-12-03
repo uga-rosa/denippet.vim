@@ -53,7 +53,7 @@ export function main(denops: Denops): void {
     clearTimeout(timeoutId);
     timeoutId = setTimeout(async () => {
       const id = lambda.register(denops, async () => {
-        await session.update();
+        await session.update(session.snippet?.currentNode().tabstop);
         return true;
       });
       await denops.call(
@@ -65,9 +65,9 @@ export function main(denops: Denops): void {
     }, syncDelay);
   }
 
-  async function forceUpdate(): Promise<void> {
+  async function forceUpdate(tabstop?: number): Promise<void> {
     clearTimeout(timeoutId);
-    await session.update();
+    await session.update(tabstop);
   }
 
   denops.dispatcher = {
@@ -123,7 +123,7 @@ export function main(denops: Denops): void {
           if (syncDelay >= 0) {
             const updateId = lambda.register(denops, async () => {
               if (syncDelay === 0) {
-                await session.update();
+                await session.update(session.snippet?.currentNode().tabstop);
               } else if (syncDelay > 0) {
                 debounceUpdate(syncDelay);
               }
@@ -149,7 +149,7 @@ export function main(denops: Denops): void {
         return;
       }
       if ((await fn.mode(denops))[0] === "i") {
-        await forceUpdate();
+        await forceUpdate(session.snippet.currentNode().tabstop);
       }
       session.guard();
       await session.jump(dir);

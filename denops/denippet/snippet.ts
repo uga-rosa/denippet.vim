@@ -86,11 +86,11 @@ export class Snippet {
     return this.jumpableNodes[this.nodeIndex];
   }
 
-  async update(): Promise<void> {
+  async update(tabstop?: number): Promise<void> {
     await this.currentNode().updateInput();
     const eventignore = await op.eventignore.get(this.denops);
     await op.eventignore.set(this.denops, "all");
-    await this.snippet.updateRange(undefined, this.currentNode().tabstop);
+    await this.snippet.updateRange(undefined, tabstop);
     await op.eventignore.set(this.denops, eventignore);
     // Extmark could disappear with updateRange().
     await this.currentNode().setExtmark();

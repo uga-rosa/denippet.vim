@@ -49,12 +49,12 @@ export class Session {
     await clearExtmark(this.denops);
   }
 
-  async update(): Promise<void> {
+  async update(tabstop?: number): Promise<void> {
     if (this.isGuarded) {
       return;
     }
     try {
-      await this.snippet?.update();
+      await this.snippet?.update(tabstop);
     } catch (e) {
       echoerr(this.denops, e);
       await this.drop();
