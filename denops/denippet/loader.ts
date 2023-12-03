@@ -10,7 +10,7 @@ type ifKeyword = u.PredicateType<typeof isIfKeyword>;
 const isRawSnippet = is.ObjectOf({
   prefix: is.OptionalOf(isStringOrArray),
   body: isStringOrArray,
-  description: is.OptionalOf(is.String),
+  description: is.OptionalOf(isStringOrArray),
   if: is.OptionalOf(isIfKeyword),
   eval: is.OptionalOf(is.String),
 });
@@ -32,7 +32,7 @@ function isIfFunc(
 const isTSSnippet = is.ObjectOf({
   prefix: is.OptionalOf(isStringOrArray),
   body: is.OneOf([isStringOrArray, isBodyFunc]),
-  description: is.OptionalOf(is.String),
+  description: is.OptionalOf(isStringOrArray),
   if: is.OptionalOf(is.OneOf([isIfKeyword, isIfFunc])),
   eval: is.OptionalOf(is.String),
 });
@@ -43,7 +43,7 @@ export type TSSnippet = u.PredicateType<typeof isTSSnippet>;
 const isGlobalSnippet = is.ObjectOf({
   prefix: is.OptionalOf(isStringOrArray),
   body: isStringOrArray,
-  description: is.OptionalOf(is.String),
+  description: is.OptionalOf(isStringOrArray),
   scope: is.OptionalOf(is.String),
 });
 
@@ -60,7 +60,7 @@ export type NormalizedSnippet = {
   name: string;
   prefix: string[];
   body: string | ((denops: Denops) => Promise<string>);
-  description?: string;
+  description: string;
   if?: ifKeyword | u.PredicateType<typeof isIfFunc>;
   eval?: string;
 };
@@ -69,8 +69,14 @@ function toArray<T>(x: T | T[]): T[] {
   return Array.isArray(x) ? x : [x];
 }
 
-function toString(x: unknown): string {
-  return is.ArrayOf(is.String)(x) ? x.join("\n") : `${x}`;
+function toString(x?: string | string[]): string {
+  if (x == null) {
+    return "";
+  } else if (is.String(x)) {
+    return x;
+  } else {
+    return x.join("\n");
+  }
 }
 
 // Keys are filetypes
@@ -135,6 +141,7 @@ export async function load(
           typeof snip.body == "function" ? await snip.body(denops) : snip.body,
         );
       },
+      description: toString(snip.description),
     }));
   } else {
     const raw = await Deno.readTextFile(filepath);
@@ -150,6 +157,7 @@ export async function load(
         name,
         prefix: toArray(snip.prefix ?? name),
         body: toString(snip.body),
+        description: toString(snip.description),
       }));
     } else if (extension === "code-snippets") {
       const content = JSON.parse(raw);
@@ -161,6 +169,7 @@ export async function load(
           name,
           prefix: toArray(snippet.prefix ?? name),
           body: toString(snippet.body),
+          description: toString(snippet.description),
         };
         setSnippets(ft, [snip]);
       }
