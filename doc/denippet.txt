@@ -112,6 +112,13 @@ g:denippet_sync_delay ~
 
 	Default: 0
 
+						*g:denippet_drop_on_zero*
+g:denippet_drop_on_zero ~
+	Whether to drop when jumping to a node with a tabstop of 0.
+	Drop is to discard the currently expanded snippet, which is usually
+	done when returning to normal mode.
+
+	Default: v:false
 
 ==============================================================================
 SNIPPET GRAMMAR					*denippet-snippet-grammar*

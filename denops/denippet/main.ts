@@ -155,6 +155,12 @@ export function main(denops: Denops): void {
       await session.jump(dir);
       await denops.cmd("do InsertLeave");
       session.unguard();
+      if (
+        await g.get(denops, "denippet_drop_on_zero", false) &&
+        session.snippet?.currentNode().tabstop === 0
+      ) {
+        await session.drop();
+      }
     },
 
     choosable(): boolean {

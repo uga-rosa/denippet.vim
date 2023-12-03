@@ -4,6 +4,7 @@ endif
 let g:loaded_denippet = 1
 
 let g:denippet_sync_delay = get(g:, 'denippet_sync_delay', 0)
+let g:denippet_drop_on_zero = get(g:, 'denippet_drop_on_zero', v:false)
 
 inoremap <Plug>(denippet-expand) <Cmd>call denippet#expand()<CR>
 inoremap <Plug>(denippet-expand-or-jump) <Cmd>call <SID>expand_or_jump()<CR>
