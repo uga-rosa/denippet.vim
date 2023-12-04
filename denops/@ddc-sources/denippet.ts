@@ -24,9 +24,9 @@ export class Source extends BaseSource<Params> {
   async gather({
     denops,
   }: GatherArguments<Params>): Promise<DdcGatherItems> {
-    return await denops.dispatch(
-      "denippet",
-      "getCompleteItems",
+    // We have to go through Vim script to guarantee that Denippet is loaded.
+    return await denops.call(
+      "denippet#get_complete_items",
       false,
     ) as Item<UserData>[];
   }
