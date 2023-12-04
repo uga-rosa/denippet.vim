@@ -122,6 +122,10 @@ export function main(denops: Denops): void {
           );
           if (syncDelay >= 0) {
             const updateId = lambda.register(denops, async () => {
+              // pum.vim fires TextChangedI even if the popup menu is visible.
+              if (await denops.call("pum#entered").catch(() => false)) {
+                return;
+              }
               if (syncDelay === 0) {
                 await session.update(session.snippet?.currentNode().tabstop);
               } else if (syncDelay > 0) {
