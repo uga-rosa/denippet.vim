@@ -22,7 +22,7 @@ export class Snippet {
     body: string,
     outer?: Snippet,
     prefix?: string,
-  ): Promise<Snippet | undefined> {
+  ): Promise<Snippet> {
     const snippetNode = await parse(denops, body);
 
     // Resolve reference relationships using breadth first search.
@@ -77,20 +77,10 @@ export class Snippet {
     // Calculate range each node
     await snippetNode.updateRange(cursor);
 
-    const snippet = new Snippet(denops, snippetNode, jumpableNodes, outer);
-
     // Jump to the first node
-    if (snippet.currentNode() == null) {
-      return;
-    } else {
-      await snippet.currentNode().jump();
-    }
+    await jumpableNodes[0]?.jump();
 
-    // This also implicitly indicates jumpableNodes.length === 1.
-    if (snippet.currentNode().tabstop == 0) {
-      return;
-    }
-
+    const snippet = new Snippet(denops, snippetNode, jumpableNodes, outer);
     await snippet.doNodeEnter();
     return snippet;
   }
