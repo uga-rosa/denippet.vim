@@ -81,7 +81,6 @@ export class Snippet {
     await jumpableNodes[0]?.jump();
 
     const snippet = new Snippet(denops, snippetNode, jumpableNodes, outer);
-    await snippet.doNodeEnter();
     return snippet;
   }
 

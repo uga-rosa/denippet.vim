@@ -18,6 +18,7 @@ export class Session {
     const snippet = await Snippet.create(this.denops, body, this.snippet, prefix);
     if (snippet.jumpableNodes.length > 0 && snippet.jumpableNodes[0].tabstop > 0) {
       this.snippet = snippet;
+      await this.snippet.doNodeEnter();
       return true;
     } else {
       // No jumpable nodes or only $0
