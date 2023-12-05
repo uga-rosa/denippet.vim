@@ -22,12 +22,12 @@ export class Snippet {
     body: string,
     outer?: Snippet,
     prefix?: string,
-  ): Promise<Snippet> {
-    const snippet = await parse(denops, body);
+  ): Promise<Snippet | undefined> {
+    const snippetNode = await parse(denops, body);
 
     // Resolve reference relationships using breadth first search.
     const isJumpable = (token: Node.Node): token is Node.Jumpable => token.isJumpable();
-    const nodeQueue = snippet.children.filter((node) => node.type !== "text");
+    const nodeQueue = snippetNode.children.filter((node) => node.type !== "text");
     // Key is tabstop
     const jumpableNodeMap = new Map<number, Node.Jumpable>();
     while (true) {
@@ -71,15 +71,27 @@ export class Snippet {
     const cursor = await lsputil.getCursor(denops);
     cursor.character -= prefix?.length ?? 0;
     // Set the text to the buffer
-    const insertText = await snippet.getText();
+    const insertText = await snippetNode.getText();
     await linePatch(denops, prefix?.length ?? 0, 0, insertText);
 
     // Calculate range each node
-    await snippet.updateRange(cursor);
+    await snippetNode.updateRange(cursor);
+
+    const snippet = new Snippet(denops, snippetNode, jumpableNodes, outer);
 
     // Jump to the first node
-    await jumpableNodes[0]?.jump();
-    return new Snippet(denops, snippet, jumpableNodes, outer);
+    if (snippet.currentNode() == null) {
+      return;
+    } else {
+      await snippet.currentNode().jump();
+    }
+
+    // This also implicitly indicates jumpableNodes.length === 1.
+    if (snippet.currentNode().tabstop == 0) {
+      return;
+    }
+
+    return snippet;
   }
 
   currentNode(): Node.Jumpable {
