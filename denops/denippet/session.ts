@@ -25,6 +25,7 @@ export class Session {
       if (this.snippet != null) {
         await this.snippet.currentNode().updateInput(snippet.snippet.range);
         await this.snippet.currentNode().setExtmark();
+        await this.snippet.setVar();
       }
       return false;
     }
@@ -42,6 +43,7 @@ export class Session {
     if (this.isGuarded) {
       return;
     }
+    await this.snippet?.doNodeLeave();
     this.snippet = undefined;
     await au.group(this.denops, "denippet-session", (helper) => {
       helper.remove(["ModeChanged", "TextChangedI"]);

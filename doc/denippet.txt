@@ -10,6 +10,7 @@ INTRODUCTION					|denippet-introduction|
 MAPPINGS					|denippet-mappings|
 FUNCTIONS					|denippet-functions|
 VARIABLES					|denippet-variables|
+AUTOCMDS					|denippet-autocmds|
 SNIPPET GRAMMAR					|denippet-snippet-grammar|
 
 
@@ -119,6 +120,27 @@ g:denippet_drop_on_zero ~
 	done when returning to normal mode.
 
 	Default: |v:false|
+
+						*b:denippet_current_node*
+b:denippet_current_node ~
+	Node you are at.
+
+
+==============================================================================
+AUTOCMDS					*denippet-autocmds*
+
+						*DenippetNodeEnter*
+DenippetNodeEnter ~
+	Fires after entering node and |b:denippet_current_node| is updated.
+
+						*DenippetNodeLeave*
+DenippetNodeLeave ~
+	Fires after leaving node and before |b:denippet_current_node| is
+	updated.
+
+						*DenippetChoiceSelected*
+DenippetChoiceSelected ~
+	Fires after selecting choice and |b:denippet_current_node| is updated.
 
 
 ==============================================================================

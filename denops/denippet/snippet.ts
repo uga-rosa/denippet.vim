@@ -1,4 +1,4 @@
-import { Denops, op } from "./deps/denops.ts";
+import { b, Denops, op } from "./deps/denops.ts";
 import { lsputil } from "./deps/lsp.ts";
 import { is } from "./deps/unknownutil.ts";
 import * as Node from "./node.ts";
@@ -91,6 +91,7 @@ export class Snippet {
       return;
     }
 
+    await snippet.doNodeEnter();
     return snippet;
   }
 
@@ -106,6 +107,7 @@ export class Snippet {
     await op.eventignore.set(this.denops, eventignore);
     // Extmark could disappear with updateRange().
     await this.currentNode().setExtmark();
+    await this.setVar();
   }
 
   jumpable(dir: Dir): boolean {
@@ -127,7 +129,9 @@ export class Snippet {
       return false;
     }
     await this.snippet.updateRange(undefined, this.currentNode().tabstop);
+    await this.doNodeLeave();
     await this.currentNode().jump();
+    await this.doNodeEnter();
     return true;
   }
 
@@ -146,6 +150,26 @@ export class Snippet {
       node.selectPrev();
     }
     await this.snippet.updateRange();
+    await this.setVar();
+    await this.denops.cmd("do User DenippetChoiceSelected");
+  }
+
+  async setVar(): Promise<void> {
+    await b.set(this.denops, "denippet_current_node", this.currentNode());
+  }
+
+  async clearVar(): Promise<void> {
+    await b.set(this.denops, "denippet_current_node", {});
+  }
+
+  async doNodeEnter(): Promise<void> {
+    await this.setVar();
+    await this.denops.cmd("do User DenippetNodeEnter");
+  }
+
+  async doNodeLeave(): Promise<void> {
+    await this.denops.cmd("do User DenippetNodeLeave");
+    await this.clearVar();
   }
 }
 
