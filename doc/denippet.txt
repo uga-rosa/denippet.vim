@@ -222,7 +222,7 @@ Note in TypeScript that the file structures of json/toml/yaml are different.
 You need to export an object named "snippets". While its structure is
 essentially the same the above, it differs in that you can use function in
 "body" and "if". See type `TSSnippet` for details. >typescript
-	import { TSSnippet } from "https://deno.land/x/denippet_vim@v0.3.1/loader.ts";
+	import { TSSnippet } from "https://deno.land/x/denippet_vim@v0.4.3/loader.ts";
 
 	export const snippets: Record<string, TSSnippet> = {
 	  uuid: {
