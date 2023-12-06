@@ -7,12 +7,13 @@ See [doc](./doc/denippet.txt) for details.
 
 ## Features
 
+- Full JS regular expression support
+- Snippets can be defined in json/toml/yaml/TypeScript
+- Dynamic snippets using TypeScript functions.
 - Nested placeholders
     - You can define snippet like `console.log($1${2:, $1})$0`
 - Nested snippet expansion
     - You can expand snippet even if you already activated other snippet.
-- Snippets can be defined in json/toml/yaml/TypeScript
-- Flexible snippets using TypeScript functions.
 
 ## GIF
 
