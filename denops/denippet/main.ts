@@ -1,7 +1,7 @@
 import { au, Denops, fn, g, lambda, op } from "./deps/denops.ts";
 import { is, u } from "./deps/unknownutil.ts";
 import { lsputil } from "./deps/lsp.ts";
-import { getSnippets, load, NormalizedSnippet } from "./loader.ts";
+import { Loader, NormalizedSnippet } from "./loader.ts";
 import { Session } from "./session.ts";
 import { register } from "./variable.ts";
 import { echoerr } from "./util.ts";
@@ -23,14 +23,14 @@ type SearchResult = {
 };
 
 async function searchSnippet(
-  denops: Denops,
+  loader: Loader,
 ): Promise<SearchResult> {
-  const ctx = await lsputil.LineContext.create(denops);
+  const ctx = await lsputil.LineContext.create(loader.denops);
   const lineBeforeCursor = ctx.text.slice(0, ctx.character);
 
   let bestMatch: SearchResult = {};
-  const filetype = await op.filetype.get(denops);
-  (await getSnippets(denops, filetype, false)).forEach((snippet) => {
+  const filetype = await op.filetype.get(loader.denops);
+  (await loader.get(filetype)).forEach((snippet) => {
     snippet.prefix.forEach((prefix) => {
       if (
         lineBeforeCursor.endsWith(prefix) &&
@@ -46,6 +46,7 @@ async function searchSnippet(
 
 export function main(denops: Denops): void {
   const session = new Session(denops);
+  const loader = new Loader(denops);
 
   let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
@@ -81,19 +82,19 @@ export function main(denops: Denops): void {
         is.OneOf([is.String, is.ArrayOf(is.String)]),
       );
       try {
-        await load(filepath, filetype);
+        await loader.load(filepath, filetype);
       } catch (e) {
         echoerr(denops, `Failed to load a snippet file ${filepath}.\n${e}`);
       }
     },
 
     async expandable(): Promise<boolean> {
-      const { body } = await searchSnippet(denops);
+      const { body } = await searchSnippet(loader);
       return body != null;
     },
 
     async expand(): Promise<void> {
-      const { prefix, body } = await searchSnippet(denops);
+      const { prefix, body } = await searchSnippet(loader);
       if (body == null) {
         return;
       }
@@ -177,10 +178,9 @@ export function main(denops: Denops): void {
       await session.choice(dir);
     },
 
-    async getCompleteItems(fromNormalU: unknown): Promise<CompleteItem[]> {
-      const fromNormal = u.ensure(fromNormalU, is.Boolean);
+    async getCompleteItems(): Promise<CompleteItem[]> {
       const filetype = await op.filetype.get(denops);
-      return (await getSnippets(denops, filetype, fromNormal)).flatMap((snippet) =>
+      return (await loader.get(filetype)).flatMap((snippet) =>
         snippet.prefix.map((prefix) => ({
           word: prefix,
           kind: "Snippet",

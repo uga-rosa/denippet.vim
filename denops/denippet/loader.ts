@@ -79,105 +79,112 @@ function toString(x?: string | string[]): string {
   }
 }
 
-// Keys are filetypes
-const Cell: Record<string, NormalizedSnippet[]> = {};
+export class Loader {
+  cell: Record<string, NormalizedSnippet[]> = {};
 
-function setSnippets(
-  filetype: string | string[],
-  snippets: NormalizedSnippet[],
-): void {
-  toArray(filetype).forEach((ft) => {
-    if (Cell[ft] == null) {
-      Cell[ft] = [];
-    }
-    Cell[ft].push(...snippets);
-  });
-}
+  constructor(
+    public denops: Denops,
+  ) {}
 
-export async function getSnippets(
-  denops: Denops,
-  ft: string,
-  fromNormal: boolean,
-): Promise<NormalizedSnippet[]> {
-  const snippets = [
-    ...Cell[ft] ?? [],
-    ...Cell["*"] ?? [],
-  ];
-  return await asyncFilter(snippets, async (snippet) => {
-    if (snippet.if == null) {
-      return true;
-    } else if (isIfFunc(snippet.if)) {
-      return Boolean(await snippet.if(denops));
-    } else if (snippet.if === "base") {
-      return Boolean(await denops.call("denippet#load#base", snippet.prefix, fromNormal));
-    } else if (snippet.if === "start") {
-      return Boolean(await denops.call("denippet#load#start", snippet.prefix, fromNormal));
-    } else if (!snippet.eval) {
-      return false;
-    } else if (snippet.if === "vimscript") {
-      return Boolean(await denops.call("eval", snippet.eval));
-    } else {
-      return Boolean(await denops.call("luaeval", "assert(loadstring(_A[1]))()", [snippet.eval]));
-    }
-  });
-}
+  reset(): void {
+    this.cell = {};
+  }
 
-export async function load(
-  filepath: string,
-  filetype: string | string[],
-): Promise<void> {
-  const extension = filepath.split(".").pop()!;
-  let snippets: NormalizedSnippet[] = [];
+  set(
+    filetype: string | string[],
+    snippets: NormalizedSnippet[],
+  ): void {
+    toArray(filetype).forEach((ft) => {
+      if (this.cell[ft] == null) {
+        this.cell[ft] = [];
+      }
+      this.cell[ft].push(...snippets);
+    });
+  }
 
-  if (extension === "ts") {
-    const content = await import(filepath).then((module) => module.snippets);
-    u.assert(content, is.RecordOf(isTSSnippet));
-    snippets = Object.entries(content).map(([name, snip]) => ({
-      ...snip,
-      name,
-      prefix: toArray(snip.prefix ?? name),
-      body: async (denops: Denops) => {
-        return toString(
-          typeof snip.body == "function" ? await snip.body(denops) : snip.body,
+  async get(ft: string): Promise<NormalizedSnippet[]> {
+    const snippets = [
+      ...this.cell[ft] ?? [],
+      ...this.cell["*"] ?? [],
+    ];
+    return await asyncFilter(snippets, async (snippet) => {
+      if (snippet.if == null) {
+        return true;
+      } else if (isIfFunc(snippet.if)) {
+        return Boolean(await snippet.if(this.denops));
+      } else if (snippet.if === "base") {
+        return Boolean(await this.denops.call("denippet#load#base", snippet.prefix));
+      } else if (snippet.if === "start") {
+        return Boolean(await this.denops.call("denippet#load#start", snippet.prefix));
+      } else if (!snippet.eval) {
+        return false;
+      } else if (snippet.if === "vimscript") {
+        return Boolean(await this.denops.call("eval", snippet.eval));
+      } else {
+        return Boolean(
+          await this.denops.call("luaeval", "assert(loadstring(_A[1]))()", [snippet.eval]),
         );
-      },
-      description: toString(snip.description),
-    }));
-  } else {
-    const raw = await Deno.readTextFile(filepath);
-    if (["json", "toml", "yaml"].includes(extension)) {
-      const content = (extension === "json")
-        ? JSON.parse(raw)
-        : extension === "toml"
-        ? TOML.parse(raw)
-        : YAML.parse(raw);
-      u.assert(content, is.RecordOf(isRawSnippet));
+      }
+    });
+  }
+
+  async load(
+    filepath: string,
+    filetype: string | string[],
+  ): Promise<void> {
+    const extension = filepath.split(".").pop()!;
+    let snippets: NormalizedSnippet[] = [];
+
+    if (extension === "ts") {
+      const content = await import(filepath).then((module) => module.snippets);
+      u.assert(content, is.RecordOf(isTSSnippet));
       snippets = Object.entries(content).map(([name, snip]) => ({
         ...snip,
         name,
         prefix: toArray(snip.prefix ?? name),
-        body: toString(snip.body),
+        body: async (denops: Denops) => {
+          return toString(
+            typeof snip.body == "function" ? await snip.body(denops) : snip.body,
+          );
+        },
         description: toString(snip.description),
       }));
-    } else if (extension === "code-snippets") {
-      const content = JSON.parse(raw);
-      u.assert(content, is.RecordOf(isGlobalSnippet));
-      for (const [name, snippet] of Object.entries(content)) {
-        const ft = snippet.scope ? snippet.scope.split(",").map(langToFt) : "*";
-        const snip = {
-          ...snippet,
-          name,
-          prefix: toArray(snippet.prefix ?? name),
-          body: toString(snippet.body),
-          description: toString(snippet.description),
-        };
-        setSnippets(ft, [snip]);
-      }
-      return;
     } else {
-      throw new Error(`Unknown extension: ${extension}`);
+      const raw = await Deno.readTextFile(filepath);
+      if (["json", "toml", "yaml"].includes(extension)) {
+        const content = (extension === "json")
+          ? JSON.parse(raw)
+          : extension === "toml"
+          ? TOML.parse(raw)
+          : YAML.parse(raw);
+        u.assert(content, is.RecordOf(isRawSnippet));
+        snippets = Object.entries(content).map(([name, snip]) => ({
+          ...snip,
+          name,
+          prefix: toArray(snip.prefix ?? name),
+          body: toString(snip.body),
+          description: toString(snip.description),
+        }));
+      } else if (extension === "code-snippets") {
+        const content = JSON.parse(raw);
+        u.assert(content, is.RecordOf(isGlobalSnippet));
+        for (const [name, snippet] of Object.entries(content)) {
+          const ft = snippet.scope ? snippet.scope.split(",").map(langToFt) : "*";
+          const snip = {
+            ...snippet,
+            name,
+            prefix: toArray(snippet.prefix ?? name),
+            body: toString(snippet.body),
+            description: toString(snippet.description),
+          };
+          this.set(ft, [snip]);
+        }
+        return;
+      } else {
+        throw new Error(`Unknown extension: ${extension}`);
+      }
     }
-  }
 
-  setSnippets(filetype, snippets);
+    this.set(filetype, snippets);
+  }
 }
