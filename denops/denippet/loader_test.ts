@@ -2,7 +2,8 @@ import { Loader } from "./loader.ts";
 import { op, test } from "./deps/denops.ts";
 import { assertEquals, path } from "./deps/std.ts";
 
-const testDataDir = new URL("../../test/data", import.meta.url).pathname;
+const pluginRoot = path.fromFileUrl(new URL("../..", import.meta.url));
+const testDataDir = path.join(pluginRoot, "test", "data");
 
 test({
   mode: "all",
