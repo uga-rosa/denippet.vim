@@ -1,5 +1,5 @@
 import { Denops } from "./deps/denops.ts";
-import { TOML, YAML } from "./deps/std.ts";
+import { path, TOML, YAML } from "./deps/std.ts";
 import { is, u } from "./deps/unknownutil.ts";
 import { asyncFilter } from "./util.ts";
 
@@ -136,7 +136,8 @@ export class Loader {
     let snippets: NormalizedSnippet[] = [];
 
     if (extension === "ts") {
-      const content = await import(filepath).then((module) => module.snippets);
+      const content = await import(path.toFileUrl(filepath).toString())
+        .then((module) => module.snippets);
       u.assert(content, is.RecordOf(isTSSnippet));
       snippets = Object.entries(content).map(([name, snip]) => ({
         ...snip,
