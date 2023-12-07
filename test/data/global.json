@@ -1,0 +1,6 @@
+{
+  "global": {
+    "prefix": "global",
+    "body": "global $1"
+  }
+}

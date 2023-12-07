@@ -1,0 +1,12 @@
+{
+  "foo": {
+    "prefix": "foo",
+    "scope": "foo",
+    "body": "foo $1"
+  },
+  "bar": {
+    "prefix": "bar",
+    "scope": "bar",
+    "body": "bar $1"
+  }
+}

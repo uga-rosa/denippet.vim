@@ -1,0 +1,11 @@
+[print]
+prefix = "p"
+body = "console.log($0)"
+
+[if]
+prefix = "if"
+body = """
+if ($1) {
+	$0
+}\
+"""
