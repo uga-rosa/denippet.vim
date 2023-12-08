@@ -91,9 +91,12 @@ export class Snippet {
   async update(tabstop?: number): Promise<void> {
     await this.currentNode().updateInput();
     const eventignore = await op.eventignore.get(this.denops);
-    await op.eventignore.set(this.denops, "all");
-    await this.snippet.updateRange(undefined, tabstop);
-    await op.eventignore.set(this.denops, eventignore);
+    try {
+      await op.eventignore.set(this.denops, "all");
+      await this.snippet.updateRange(undefined, tabstop);
+    } finally {
+      await op.eventignore.set(this.denops, eventignore);
+    }
     // Extmark could disappear with updateRange().
     await this.currentNode().setExtmark();
     await this.setVar();
