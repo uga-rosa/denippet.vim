@@ -1,3 +1,5 @@
+[![integration](https://github.com/uga-rosa/denippet.vim/actions/workflows/integration.yml/badge.svg)](https://github.com/uga-rosa/denippet.vim/actions/workflows/integration.yml)
+
 # denippet.vim
 
 Denippet is a Vim/Neovim snippet plugin extended from VSCode's snippets.
