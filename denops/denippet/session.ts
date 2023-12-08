@@ -61,6 +61,7 @@ export class Session {
       await this.snippet?.update(tabstop);
     } catch (e) {
       echoerr(this.denops, e);
+      this.unguard();
       await this.drop();
     }
     this.unguard();
