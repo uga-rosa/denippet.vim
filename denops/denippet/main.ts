@@ -127,16 +127,12 @@ export function main(denops: Denops): void {
               if (await denops.call("pum#entered").catch(() => false)) {
                 return;
               }
-              if (syncDelay === 0) {
-                await session.update(session.snippet?.currentNode().tabstop);
-              } else if (syncDelay > 0) {
-                debounceUpdate(syncDelay);
-              }
+              debounceUpdate(syncDelay);
             });
             helper.define(
               "TextChangedI",
               "*",
-              `call denops#request('${denops.name}', '${updateId}', [])`,
+              `call denops#notify('${denops.name}', '${updateId}', [])`,
             );
           }
         });
