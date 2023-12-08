@@ -56,12 +56,14 @@ export class Session {
     if (this.isGuarded) {
       return;
     }
+    this.guard();
     try {
       await this.snippet?.update(tabstop);
     } catch (e) {
       echoerr(this.denops, e);
       await this.drop();
     }
+    this.unguard();
   }
 
   jumpable(dir: Dir): boolean {
