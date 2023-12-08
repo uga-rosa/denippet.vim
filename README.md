@@ -5,6 +5,8 @@ Powered by [denops.vim](https://github.com/vim-denops/denops.vim).
 
 See [doc](./doc/denippet.txt) for details.
 
+Click [here](https://zenn.dev/uga_rosa/articles/494805861d774a) to read the introduction article in Japanese.
+
 ## Features
 
 - Full JS regular expression support
