@@ -1,12 +1,10 @@
 // https://code.visualstudio.com/docs/editor/userdefinedsnippets#_variables
 
 import { Denops, fn, op } from "./deps/denops.ts";
+import { is } from "./deps/unknownutil.ts";
 import { trimBaseIndent } from "./indent.ts";
 
-export type VariableFunc = (denops: Denops) =>
-  | string
-  | undefined
-  | Promise<string | undefined>;
+export type VariableFunc = (denops: Denops, text: string) => string | Promise<string>;
 
 const Cell: Record<string, VariableFunc> = {};
 
@@ -20,18 +18,19 @@ export function register(
 export async function call(
   denops: Denops,
   name: string,
-): Promise<string | undefined> {
-  return await Cell[name]?.(denops);
+  text: string,
+): Promise<string> {
+  return await Cell[name]?.(denops, text);
 }
 
 /** The currently selected text or the empty string */
-register("TM_SELECTED_TEXT", async (denops: Denops) => {
+register("TM_SELECTED_TEXT", async (denops) => {
   const text = await fn.getreg(denops, `"`) as string;
   return trimBaseIndent(text);
 });
 
 /** The contents of the current line */
-register("TM_CURRENT_LINE", async (denops: Denops) => {
+register("TM_CURRENT_LINE", async (denops) => {
   return await fn.getline(denops, ".");
 });
 
@@ -39,32 +38,32 @@ register("TM_CURRENT_LINE", async (denops: Denops) => {
 register("TM_CURRENT_WORD", () => "");
 
 /** The zero-index based line number */
-register("TM_LINE_INDEX", async (denops: Denops) => {
+register("TM_LINE_INDEX", async (denops) => {
   return (await fn.line(denops, ".") - 1).toString();
 });
 
 /** The one-index based line number */
-register("TM_LINE_NUMBER", async (denops: Denops) => {
+register("TM_LINE_NUMBER", async (denops) => {
   return (await fn.line(denops, ".")).toString();
 });
 
 /** The filename of the current document */
-register("TM_FILENAME", async (denops: Denops) => {
+register("TM_FILENAME", async (denops) => {
   return (await fn.expand(denops, "%:p:t")) as string;
 });
 
 /** The filename of the current document without its extensions */
-register("TM_FILENAME_BASE", async (denops: Denops) => {
+register("TM_FILENAME_BASE", async (denops) => {
   return (await fn.expand(denops, "%:p:t:r")) as string;
 });
 
 /** The directory of the current document */
-register("TM_DIRECTORY", async (denops: Denops) => {
+register("TM_DIRECTORY", async (denops) => {
   return (await fn.expand(denops, "%:p:h:t")) as string;
 });
 
 /** The full file path of the current document */
-register("TM_FILEPATH", async (denops: Denops) => {
+register("TM_FILEPATH", async (denops) => {
   return (await fn.expand(denops, "%:p")) as string;
 });
 
@@ -72,16 +71,17 @@ register("TM_FILEPATH", async (denops: Denops) => {
  * The relative (to the opened workspace or folder) file path of
  * the current document
  */
-register("RELATIVE_FILEPATH", async (denops: Denops) => {
+register("RELATIVE_FILEPATH", async (denops) => {
   return (await fn.expand(denops, "%")) as string;
 });
 
 /** The contents of your clipboard */
-register("CLIPBOARD", async (denops: Denops) => {
+register("CLIPBOARD", async (denops, text) => {
   const clipboard = await fn.getreg(denops) as string;
-  if (typeof clipboard == "string") {
+  if (is.String(clipboard)) {
     return trimBaseIndent(clipboard);
   }
+  return text;
 });
 
 /** The name of the opened workspace or folder */
@@ -97,57 +97,57 @@ register("CURSOR_INDEX", () => "0");
 register("CURSOR_NUMBER", () => "1");
 
 /** The current year */
-register("CURRENT_YEAR", async (denops: Denops) => {
+register("CURRENT_YEAR", async (denops) => {
   return await fn.strftime(denops, "%Y");
 });
 
 /** The current year's last two digits */
-register("CURRENT_YEAR_SHORT", async (denops: Denops) => {
+register("CURRENT_YEAR_SHORT", async (denops) => {
   return await fn.strftime(denops, "%y");
 });
 
 /** The month as two digits (example '02') */
-register("CURRENT_MONTH", async (denops: Denops) => {
+register("CURRENT_MONTH", async (denops) => {
   return await fn.strftime(denops, "%m");
 });
 
 /** The full name of the month (example 'July') */
-register("CURRENT_MONTH_NAME", async (denops: Denops) => {
+register("CURRENT_MONTH_NAME", async (denops) => {
   return await fn.strftime(denops, "%B");
 });
 
 /** The short name of the month (example 'Jul') */
-register("CURRENT_MONTH_NAME_SHORT", async (denops: Denops) => {
+register("CURRENT_MONTH_NAME_SHORT", async (denops) => {
   return await fn.strftime(denops, "%b");
 });
 
 /** The day of the month as two digits (example '08') */
-register("CURRENT_DATE", async (denops: Denops) => {
+register("CURRENT_DATE", async (denops) => {
   return await fn.strftime(denops, "%d");
 });
 
 /** The name of day (example 'Monday') */
-register("CURRENT_DAY_NAME", async (denops: Denops) => {
+register("CURRENT_DAY_NAME", async (denops) => {
   return await fn.strftime(denops, "%A");
 });
 
 /** The short name of the day (example 'Mon') */
-register("CURRENT_DAY_NAME_SHORT", async (denops: Denops) => {
+register("CURRENT_DAY_NAME_SHORT", async (denops) => {
   return await fn.strftime(denops, "%a");
 });
 
 /** The current hour in 24-hour clock format */
-register("CURRENT_HOUR", async (denops: Denops) => {
+register("CURRENT_HOUR", async (denops) => {
   return await fn.strftime(denops, "%H");
 });
 
 /** The current minute as two digits */
-register("CURRENT_MINUTE", async (denops: Denops) => {
+register("CURRENT_MINUTE", async (denops) => {
   return await fn.strftime(denops, "%M");
 });
 
 /** The current second as two digits */
-register("CURRENT_SECOND", async (denops: Denops) => {
+register("CURRENT_SECOND", async (denops) => {
   return await fn.strftime(denops, "%S");
 });
 
@@ -187,7 +187,7 @@ register("RANDOM_HEX", () => {
 register("UUID", () => crypto.randomUUID());
 
 /** Example output: in PHP /* or in HTML <!-- */
-register("BLOCK_COMMENT_START", async (denops: Denops) => {
+register("BLOCK_COMMENT_START", async (denops, text) => {
   const commentstring = await op.commentstring.get(denops);
   if (!commentstring.endsWith("%s")) {
     return commentstring.split("%s")[0];
@@ -201,11 +201,11 @@ register("BLOCK_COMMENT_START", async (denops: Denops) => {
       blockCommentStart = str;
     }
   });
-  return blockCommentStart;
+  return blockCommentStart ?? text;
 });
 
 /** Example output: in PHP *\/ or in HTML --> */
-register("BLOCK_COMMENT_END", async (denops: Denops) => {
+register("BLOCK_COMMENT_END", async (denops, text) => {
   const commentstring = await op.commentstring.get(denops);
   if (!commentstring.endsWith("%s")) {
     return commentstring.split("%s")[1];
@@ -219,13 +219,14 @@ register("BLOCK_COMMENT_END", async (denops: Denops) => {
       blockCommentStart = str;
     }
   });
-  return blockCommentStart;
+  return blockCommentStart ?? text;
 });
 
 /** Example output: in PHP // */
-register("LINE_COMMENT", async (denops: Denops) => {
+register("LINE_COMMENT", async (denops, text) => {
   const commentstring = await op.commentstring.get(denops);
   if (commentstring.endsWith("%s")) {
     return commentstring.replace("%s", "");
   }
+  return text;
 });

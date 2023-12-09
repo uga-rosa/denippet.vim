@@ -203,9 +203,9 @@ export function main(denops: Denops): void {
     registerVariable(nameU: unknown, idU: unknown): void {
       const name = u.ensure(nameU, is.String);
       const id = u.ensure(idU, is.String);
-      const cb = async (denops: Denops) => {
-        const retval = await denops.call("denops#callback#call", id);
-        u.assert(retval, is.OptionalOf(is.String));
+      const cb = async (denops: Denops, text: string) => {
+        const retval = await denops.call("denops#callback#call", id, text);
+        u.assert(retval, is.String);
         return retval;
       };
       register(name, cb);

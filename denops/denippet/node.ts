@@ -311,7 +311,7 @@ export class Choice extends Jumpable {
 
 export class Variable extends Node {
   type: "variable" = "variable";
-  text?: string;
+  text = "";
 
   constructor(
     public denops: Denops,
@@ -322,9 +322,14 @@ export class Variable extends Node {
     super();
   }
 
-  async getText(): Promise<string> {
-    if (this.text == null) {
-      this.text = await V.call(this.denops, this.name) ?? "";
+  evaled = false;
+  async getText(tabstop?: number): Promise<string> {
+    if (!this.evaled) {
+      this.evaled = true;
+      const text = await Promise.all(
+        this.children?.map(async (child) => await child.getText(tabstop)) ?? [],
+      ).then((children) => children.join(""));
+      this.text = await V.call(this.denops, this.name, text);
       if (this.transform) {
         this.text = this.transform.transformer(this.text);
       }
