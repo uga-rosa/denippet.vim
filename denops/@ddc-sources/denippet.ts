@@ -10,6 +10,7 @@ import {
   OnCompleteDoneArguments,
 } from "https://deno.land/x/ddc_vim@v4.3.1/base/source.ts";
 import { Denops, op } from "../denippet/deps/denops.ts";
+import { splitLines } from "../denippet/util.ts";
 
 type Params = Record<PropertyKey, never>;
 
@@ -56,7 +57,7 @@ export class Source extends BaseSource<Params> {
       return { kind: "empty" };
     }
     const contents: string[] = await this.snippetToString(denops, userData.denippet.body)
-      .then((body) => body.replaceAll(/\r\n?/g, "\n").split("\n"))
+      .then(splitLines)
       .catch(() => []);
     if (contents.length > 0) {
       const filetype = await op.filetype.get(denops);

@@ -1,7 +1,7 @@
 import { Denops } from "./deps/denops.ts";
 import { path, TOML, YAML } from "./deps/std.ts";
 import { is, u } from "./deps/unknownutil.ts";
-import { asyncFilter } from "./util.ts";
+import { asyncFilter, getNewline } from "./util.ts";
 
 const isStringOrArray = is.OneOf([is.String, is.ArrayOf(is.String)]);
 const isIfKeyword = is.LiteralOneOf(["base", "start", "vimscript", "lua"] as const);
@@ -69,13 +69,16 @@ function toArray<T>(x: T | T[]): T[] {
   return Array.isArray(x) ? x : [x];
 }
 
-function toString(x?: string | string[]): string {
+function toString(
+  x: string | string[] | undefined,
+  newline: string,
+): string {
   if (x == null) {
     return "";
   } else if (is.String(x)) {
     return x;
   } else {
-    return x.join("\n");
+    return x.join(newline);
   }
 }
 
@@ -132,9 +135,10 @@ export class Loader {
     filepath: string,
     filetype: string | string[],
   ): Promise<void> {
-    const extension = filepath.split(".").pop()!;
+    const newline = await getNewline(this.denops);
     let snippets: NormalizedSnippet[] = [];
 
+    const extension = filepath.split(".").pop()!;
     if (extension === "ts") {
       const content = await import(path.toFileUrl(filepath).toString())
         .then((module) => module.snippets);
@@ -146,9 +150,10 @@ export class Loader {
         body: async (denops: Denops) => {
           return toString(
             typeof snip.body == "function" ? await snip.body(denops) : snip.body,
+            newline,
           );
         },
-        description: toString(snip.description),
+        description: toString(snip.description, newline),
       }));
     } else {
       const raw = await Deno.readTextFile(filepath);
@@ -163,8 +168,8 @@ export class Loader {
           ...snip,
           name,
           prefix: toArray(snip.prefix ?? name),
-          body: toString(snip.body),
-          description: toString(snip.description),
+          body: toString(snip.body, newline),
+          description: toString(snip.description, newline),
         }));
       } else if (extension === "code-snippets") {
         const content = JSON.parse(raw);
@@ -175,8 +180,8 @@ export class Loader {
             ...snippet,
             name,
             prefix: toArray(snippet.prefix ?? name),
-            body: toString(snippet.body),
-            description: toString(snippet.description),
+            body: toString(snippet.body, newline),
+            description: toString(snippet.description, newline),
           };
           this.set(ft, [snip]);
         }

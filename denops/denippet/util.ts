@@ -1,4 +1,4 @@
-import { batch, Denops } from "./deps/denops.ts";
+import { batch, Denops, op } from "./deps/denops.ts";
 import { LSP, lsputil } from "./deps/lsp.ts";
 import { getExtmarks, setExtmark } from "./extmark.ts";
 
@@ -21,7 +21,12 @@ export async function asyncFilter<T>(
   return array.filter((_, i) => bits[i]);
 }
 
-export function splitLines(text: string): [string, ...string[]] {
+export async function getNewline(denops: Denops): Promise<string> {
+  const ff = await op.fileformat.get(denops);
+  return ff === "unix" ? "\n" : ff === "dos" ? "\r\n" : "\r";
+}
+
+export function splitLines(text: string): string[] {
   return text.replaceAll(/\r\n?/g, "\n").split("\n") as [string, ...string[]];
 }
 
