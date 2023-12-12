@@ -9,6 +9,10 @@ See [doc](./doc/denippet.txt) for details.
 
 Click [here](https://zenn.dev/uga_rosa/articles/494805861d774a) to read the introduction article in Japanese.
 
+## Requirements
+
+- [denops.vim](https://github.com/vim-denops/denops.vim)
+
 ## Features
 
 - Full JS regular expression support
