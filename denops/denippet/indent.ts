@@ -41,11 +41,11 @@ export async function adjustIndent(
     );
   }
   // Add baseIndent to all lines except the first line.
-  text = text.replaceAll(/\n/g, `\n${baseIndent}`);
+  text = text.replaceAll("\n", `\n${baseIndent}`);
   // Remove indentation on all blank lines except the last line.
   text = text.replaceAll(/\n\s*\n/g, "\n\n");
 
-  return text.replaceAll(/\n/g, newline);
+  return text.replaceAll("\n", newline);
 }
 
 export async function trimBaseIndent(
