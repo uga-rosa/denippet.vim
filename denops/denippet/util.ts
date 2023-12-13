@@ -23,7 +23,7 @@ export async function asyncFilter<T>(
 
 export async function getNewline(denops: Denops): Promise<string> {
   const ff = await op.fileformat.get(denops);
-  return ff === "unix" ? "\n" : ff === "dos" ? "\r\n" : "\r";
+  return ff === "dos" ? "\r\n" : "\n";
 }
 
 export function splitLines(text: string): string[] {
