@@ -22,12 +22,7 @@ async function input(
     body = "[" + body.map((b) => `'${b}'`).join(",") + "]";
     cmd = cmd.replace("<body>", `${body}`);
   }
-  for (const map of maps) {
-    cmd += map;
-    if (!map.startsWith("\\<Cmd>")) {
-      cmd += "\\<Cmd>do TextChangedI\\<CR>";
-    }
-  }
+  cmd += maps.join("");
   await denops.cmd(`call feedkeys("${cmd}", 'x')`);
   await denops.cmd("do ModeChanged *:n");
 }
