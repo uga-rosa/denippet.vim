@@ -2,7 +2,7 @@
 // Copyright (c) 2019 hrsh7th
 
 import { Denops, fn, op } from "./deps/denops.ts";
-import { getNewline, splitLines } from "./util.ts";
+import { normalizeNewline, splitLines } from "./util.ts";
 
 async function getOneIndent(
   denops: Denops,
@@ -29,8 +29,7 @@ export async function adjustIndent(
   denops: Denops,
   text: string,
 ): Promise<string> {
-  const newline = await getNewline(denops);
-  text = text.replaceAll(newline, "\n");
+  text = normalizeNewline(text);
 
   const oneIndent = await getOneIndent(denops);
   const baseIndent = await getBaseIndent(denops);
@@ -45,17 +44,14 @@ export async function adjustIndent(
   // Remove indentation on all blank lines except the last line.
   text = text.replaceAll(/\n\s*\n/g, "\n\n");
 
-  return text.replaceAll("\n", newline);
+  return text;
 }
 
-export async function trimBaseIndent(
-  denops: Denops,
+export function trimBaseIndent(
   text: string,
-): Promise<string> {
-  const newline = await getNewline(denops);
-
-  text = text.replaceAll(newline, "\n");
-  const isCharWise = !/\n$/.test(text);
+): string {
+  text = normalizeNewline(text);
+  const isCharWise = !text.endsWith("\n");
   text = text.replace(/\n$/, "");
 
   let isFirstLine = true;
@@ -77,6 +73,5 @@ export async function trimBaseIndent(
     }
   });
 
-  return text.replaceAll(new RegExp(`(^|\n)${baseIndent}`, "g"), "$1")
-    .replaceAll("\n", newline);
+  return text.replaceAll(new RegExp(`(^|\n)${baseIndent}`, "g"), "$1");
 }

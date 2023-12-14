@@ -1,5 +1,6 @@
-import { batch, Denops, op } from "./deps/denops.ts";
+import { batch, Denops } from "./deps/denops.ts";
 import { LSP, lsputil } from "./deps/lsp.ts";
+import { is } from "./deps/unknownutil.ts";
 import { getExtmarks, setExtmark } from "./extmark.ts";
 
 export async function echoerr(
@@ -21,13 +22,16 @@ export async function asyncFilter<T>(
   return array.filter((_, i) => bits[i]);
 }
 
-export async function getNewline(denops: Denops): Promise<string> {
-  const ff = await op.fileformat.get(denops);
-  return ff === "dos" ? "\r\n" : "\n";
+export function normalizeNewline(text: string | string[]): string {
+  if (is.String(text)) {
+    return text.replaceAll(/\r\n?/g, "\n");
+  } else {
+    return text.join("\n");
+  }
 }
 
 export function splitLines(text: string): string[] {
-  return text.replaceAll(/\r\n?/g, "\n").split("\n") as [string, ...string[]];
+  return normalizeNewline(text).split("\n");
 }
 
 const ENCODER = new TextEncoder();

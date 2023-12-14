@@ -26,7 +26,7 @@ export async function call(
 /** The currently selected text or the empty string */
 register("TM_SELECTED_TEXT", async (denops) => {
   const text = await fn.getreg(denops, `"`) as string;
-  return await trimBaseIndent(denops, text);
+  return trimBaseIndent(text);
 });
 
 /** The contents of the current line */
@@ -79,7 +79,7 @@ register("RELATIVE_FILEPATH", async (denops) => {
 register("CLIPBOARD", async (denops, text) => {
   const clipboard = await fn.getreg(denops) as string;
   if (is.String(clipboard)) {
-    return await trimBaseIndent(denops, clipboard);
+    return trimBaseIndent(clipboard);
   }
   return text;
 });

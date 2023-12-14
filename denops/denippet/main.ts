@@ -4,7 +4,7 @@ import { lsputil } from "./deps/lsp.ts";
 import { Loader, NormalizedSnippet } from "./loader.ts";
 import { Session } from "./session.ts";
 import { register } from "./variable.ts";
-import { echoerr, getNewline } from "./util.ts";
+import { echoerr, normalizeNewline } from "./util.ts";
 import { UserData } from "../@ddc-sources/denippet.ts";
 
 type CompleteItem = {
@@ -103,10 +103,7 @@ export function main(denops: Denops): void {
     },
 
     async anonymous(bodyU: unknown, prefixU: unknown): Promise<void> {
-      let body = u.ensure(bodyU, is.OneOf([is.String, is.ArrayOf(is.String)]));
-      if (is.ArrayOf(is.String)(body)) {
-        body = body.join(await getNewline(denops));
-      }
+      const body = normalizeNewline(u.ensure(bodyU, is.OneOf([is.String, is.ArrayOf(is.String)])));
       const prefix = u.ensure(prefixU, is.OptionalOf(is.String));
       if (await session.expand(body, prefix)) {
         const syncDelay = Number(await g.get(denops, "denippet_sync_delay"));

@@ -1,7 +1,7 @@
 import { Denops } from "./deps/denops.ts";
 import { LSP, lsputil } from "./deps/lsp.ts";
 import { camelcase } from "./deps/camelcase.ts";
-import { getNewline, splitLines } from "./util.ts";
+import { splitLines } from "./util.ts";
 import * as V from "./variable.ts";
 import { clearExtmark, getExtmarks, setExtmark } from "./extmark.ts";
 
@@ -136,8 +136,7 @@ export abstract class Jumpable extends Node {
       this.range = await lsputil.toUtf16Range(this.denops, 0, range8, "utf-8");
     }
     const lines = await lsputil.getText(this.denops, 0, this.range);
-    const newline = await getNewline(this.denops);
-    this.input = lines.join(newline);
+    this.input = lines.join("\n");
   }
 
   async updateRange(
