@@ -35,7 +35,7 @@ jobs:
       matrix:
         runner:
           - ubuntu-latest
-          # - windows-latest
+          - windows-latest
           - macos-latest
     runs-on: ${{ matrix.runner }}
     steps:
