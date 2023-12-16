@@ -212,7 +212,8 @@ test({
       name: "CURRENT_TIMEZONE_OFFSET",
       fn: async () => {
         const actual = await V.call(denops, "CURRENT_TIMEZONE_OFFSET", "");
-        assertEquals(actual, "+09:00");
+        const pattern = /[+-]\d\d:\d\d/;
+        assert(pattern.test(actual));
       },
     });
 
