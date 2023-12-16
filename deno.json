@@ -7,6 +7,6 @@
     "pre-commit": "deno task fmt && deno task check && deno task test",
     "fmt": "deno fmt **/*.ts",
     "check": "deno check **/*.ts && deno fmt --check **/*.ts && deno lint",
-    "test": "deno test -A denops/**/*_test.ts",
+    "test": "TZ=Asia/Tokyo deno test -A denops/**/*_test.ts"
   }
 }
