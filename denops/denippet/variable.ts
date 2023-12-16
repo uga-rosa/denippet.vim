@@ -20,7 +20,8 @@ export async function call(
   name: string,
   text: string,
 ): Promise<string> {
-  return await Cell[name]?.(denops, text);
+  const evaled = await Cell[name]?.(denops, text);
+  return evaled ? evaled : text;
 }
 
 /** The currently selected text or the empty string */
