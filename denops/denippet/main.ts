@@ -31,8 +31,7 @@ async function searchSnippet(
   const lineBeforeCursor = ctx.text.slice(0, ctx.character);
 
   let bestMatch: SearchResult = {};
-  const filetype = await op.filetype.get(loader.denops);
-  (await loader.get(filetype)).forEach((snippet) => {
+  (await loader.get()).forEach((snippet) => {
     snippet.prefix.forEach((prefix) => {
       if (
         lineBeforeCursor.endsWith(prefix) &&
@@ -178,8 +177,7 @@ export function main(denops: Denops): void {
     },
 
     async getCompleteItems(): Promise<CompleteItem[]> {
-      const filetype = await op.filetype.get(denops);
-      return (await loader.get(filetype)).flatMap((snippet) =>
+      return (await loader.get()).flatMap((snippet) =>
         snippet.prefix.map((prefix) => ({
           word: prefix,
           kind: "Snippet",

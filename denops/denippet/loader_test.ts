@@ -22,7 +22,7 @@ test({
       fn: async () => {
         const ft = "";
         await op.filetype.set(denops, ft);
-        const snippets = await loader.get(ft);
+        const snippets = await loader.get();
         assertEquals(snippets.length, 1);
       },
     });
@@ -32,7 +32,7 @@ test({
       fn: async () => {
         const ft = "typescript";
         await op.filetype.set(denops, ft);
-        const snippets = await loader.get(ft);
+        const snippets = await loader.get();
         assertEquals(snippets.length, 3);
       },
     });
@@ -42,7 +42,7 @@ test({
       fn: async () => {
         const ft = "lua";
         await op.filetype.set(denops, ft);
-        const snippets = await loader.get(ft);
+        const snippets = await loader.get();
         assertEquals(snippets.length, 4);
       },
     });
@@ -52,7 +52,7 @@ test({
       fn: async () => {
         const ft = "vim";
         await op.filetype.set(denops, ft);
-        const snippets = await loader.get(ft);
+        const snippets = await loader.get();
         assertEquals(snippets.length, 2);
       },
     });
@@ -63,13 +63,13 @@ test({
         {
           const ft = "foo";
           await op.filetype.set(denops, ft);
-          const snippets = await loader.get(ft);
+          const snippets = await loader.get();
           assertEquals(snippets.length, 2);
         }
         {
           const ft = "bar";
           await op.filetype.set(denops, ft);
-          const snippets = await loader.get(ft);
+          const snippets = await loader.get();
           assertEquals(snippets.length, 2);
         }
       },

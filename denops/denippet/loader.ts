@@ -1,4 +1,4 @@
-import { Denops } from "./deps/denops.ts";
+import { Denops, op } from "./deps/denops.ts";
 import { path, TOML, YAML } from "./deps/std.ts";
 import { is, u } from "./deps/unknownutil.ts";
 import { asyncFilter } from "./util.ts";
@@ -109,7 +109,8 @@ export class Loader {
     return this.snippets.find((snippet) => snippet.id === id);
   }
 
-  async get(ft: string): Promise<NormalizedSnippet[]> {
+  async get(): Promise<NormalizedSnippet[]> {
+    const ft = await op.filetype.get(this.denops);
     const snippets = this.snippets.filter((snippet) =>
       snippet.filetypes.includes(ft) || snippet.filetypes.includes("*")
     );
