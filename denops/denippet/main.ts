@@ -1,4 +1,4 @@
-import { au, Denops, fn, g, lambda, op } from "./deps/denops.ts";
+import { au, Denops, fn, g, lambda } from "./deps/denops.ts";
 import { is, u } from "./deps/unknownutil.ts";
 import { lsputil } from "./deps/lsp.ts";
 import { Loader, NormalizedSnippet } from "./loader.ts";
@@ -26,12 +26,22 @@ type SearchResult = {
 
 async function searchSnippet(
   loader: Loader,
+  id?: string,
 ): Promise<SearchResult> {
   const ctx = await lsputil.LineContext.create(loader.denops);
   const lineBeforeCursor = ctx.text.slice(0, ctx.character);
 
   let bestMatch: SearchResult = {};
-  (await loader.get()).forEach((snippet) => {
+  const snippets: NormalizedSnippet[] = [];
+  if (id != null) {
+    const snippet = loader.getById(id);
+    if (snippet != null) {
+      snippets.push(snippet);
+    }
+  } else {
+    snippets.push(...await loader.get());
+  }
+  snippets.forEach((snippet) => {
     snippet.prefix.forEach((prefix) => {
       if (
         lineBeforeCursor.endsWith(prefix) &&
@@ -99,8 +109,9 @@ export function main(denops: Denops): void {
       return body != null;
     },
 
-    async expand(): Promise<void> {
-      const { prefix, matched, body } = await searchSnippet(loader);
+    async expand(idU: unknown): Promise<void> {
+      const id = u.ensure(idU, is.OptionalOf(is.String));
+      const { prefix, matched, body } = await searchSnippet(loader, id);
       if (body == null) {
         return;
       }
@@ -184,6 +195,7 @@ export function main(denops: Denops): void {
           dup: 1,
           user_data: {
             denippet: {
+              id: snippet.id,
               body: typeof snippet.body == "string" ? snippet.body : "",
               description: snippet.description ?? "",
             },

@@ -16,10 +16,17 @@ type Params = Record<PropertyKey, never>;
 
 export type UserData = {
   denippet: {
+    id: string;
     body: string;
     description: string;
   };
 };
+
+type CompletedEvent =
+  | "confirm"
+  | "confirm_word"
+  | "complete_done"
+  | "undefined";
 
 export class Source extends BaseSource<Params> {
   async gather({
@@ -34,17 +41,25 @@ export class Source extends BaseSource<Params> {
 
   async onCompleteDone({
     denops,
+    userData,
   }: OnCompleteDoneArguments<Params, UserData>): Promise<void> {
     // Not expanded if confirmed with additional input.
-    const itemWord = await denops.eval(`v:completed_item.word`) as string;
-    const beforeLine = await denops.eval(
-      `getline('.')[:col('.')-2]`,
-    ) as string;
-    if (!beforeLine.endsWith(itemWord)) {
+    const completed_event = await denops.eval("g:pum#completed_event")
+      .catch(() => "undefined") as CompletedEvent;
+    if (completed_event === "complete_done") {
       return;
+    } else if (completed_event === "undefined") {
+      // native-ui
+      const itemWord = await denops.eval(`v:completed_item.word`) as string;
+      const beforeLine = await denops.eval(
+        `getline('.')[:col('.')-2]`,
+      ) as string;
+      if (!beforeLine.endsWith(itemWord)) {
+        return;
+      }
     }
 
-    await denops.dispatch("denippet", "expand");
+    await denops.dispatch("denippet", "expand", userData.denippet.id);
     await denops.call("ddc#skip_next_complete");
   }
 
