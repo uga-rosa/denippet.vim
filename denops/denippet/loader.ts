@@ -62,7 +62,8 @@ function langToFt(lang: string): string {
 }
 
 export type NormalizedSnippet = {
-  name: string;
+  id: string;
+  filetypes: string[];
   prefix: string[];
   prefix_regexp: RegExp[];
   body: string | ((denops: Denops, matched?: RegExpMatchArray) => Promise<string>);
@@ -86,33 +87,32 @@ function toString(x?: string | string[]): string {
 }
 
 export class Loader {
-  cell: Record<string, NormalizedSnippet[]> = {};
+  snippets: NormalizedSnippet[] = [];
 
   constructor(
     public denops: Denops,
   ) {}
 
   reset(): void {
-    this.cell = {};
+    this.snippets = [];
   }
 
-  set(
-    filetype: string | string[],
-    snippets: NormalizedSnippet[],
-  ): void {
-    toArray(filetype).forEach((ft) => {
-      if (this.cell[ft] == null) {
-        this.cell[ft] = [];
-      }
-      this.cell[ft].push(...snippets);
-    });
+  getId(): string {
+    return crypto.randomUUID();
+  }
+
+  set(snippets: NormalizedSnippet[]): void {
+    this.snippets.push(...snippets);
+  }
+
+  getById(id: string): NormalizedSnippet | undefined {
+    return this.snippets.find((snippet) => snippet.id === id);
   }
 
   async get(ft: string): Promise<NormalizedSnippet[]> {
-    const snippets = [
-      ...this.cell[ft] ?? [],
-      ...this.cell["*"] ?? [],
-    ];
+    const snippets = this.snippets.filter((snippet) =>
+      snippet.filetypes.includes(ft) || snippet.filetypes.includes("*")
+    );
     return await asyncFilter(snippets, async (snippet) => {
       if (snippet.if == null) {
         return true;
@@ -138,16 +138,15 @@ export class Loader {
     filepath: string,
     filetype: string | string[],
   ): Promise<void> {
-    let snippets: NormalizedSnippet[] = [];
-
     const extension = filepath.split(".").pop()!;
     if (extension === "ts") {
       const content = await import(path.toFileUrl(filepath).toString())
         .then((module) => module.snippets);
       u.assert(content, is.RecordOf(isTSSnippet));
-      snippets = Object.entries(content).map(([name, snip]) => ({
+      const snippets = Object.entries(content).map(([name, snip]) => ({
         ...snip,
-        name,
+        id: this.getId(),
+        filetypes: toArray(filetype),
         prefix: toArray(snip.prefix ?? name),
         prefix_regexp: toArray(snip.prefix_regexp ?? []).map((pat) => new RegExp(pat + "$")),
         body: async (denops: Denops, matched?: RegExpMatchArray) => {
@@ -157,6 +156,7 @@ export class Loader {
         },
         description: toString(snip.description),
       }));
+      this.set(snippets);
     } else {
       const raw = await Deno.readTextFile(filepath);
       if (["json", "toml", "yaml"].includes(extension)) {
@@ -166,35 +166,35 @@ export class Loader {
           ? TOML.parse(raw)
           : YAML.parse(raw);
         u.assert(content, is.RecordOf(isRawSnippet));
-        snippets = Object.entries(content).map(([name, snip]) => ({
+        const snippets = Object.entries(content).map(([name, snip]) => ({
           ...snip,
-          name,
+          id: this.getId(),
+          filetypes: toArray(filetype),
           prefix: toArray(snip.prefix ?? name),
           prefix_regexp: toArray(snip.prefix_regexp ?? []).map((pat) => new RegExp(pat + "$")),
           body: toString(snip.body),
           description: toString(snip.description),
         }));
+        this.set(snippets);
       } else if (extension === "code-snippets") {
         const content = JSON.parse(raw);
         u.assert(content, is.RecordOf(isGlobalSnippet));
-        for (const [name, snippet] of Object.entries(content)) {
-          const ft = snippet.scope ? snippet.scope.split(",").map(langToFt) : "*";
-          const snip = {
+        const snippets = Object.entries(content).map(([name, snippet]) => {
+          const ft = snippet.scope ? snippet.scope.split(",").map(langToFt) : ["*"];
+          return {
             ...snippet,
-            name,
+            id: this.getId(),
+            filetypes: ft,
             prefix: toArray(snippet.prefix ?? name),
             prefix_regexp: [],
             body: toString(snippet.body),
             description: toString(snippet.description),
           };
-          this.set(ft, [snip]);
-        }
-        return;
+        });
+        this.set(snippets);
       } else {
         throw new Error(`Unknown extension: ${extension}`);
       }
     }
-
-    this.set(filetype, snippets);
   }
 }
