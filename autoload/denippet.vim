@@ -24,6 +24,10 @@ function denippet#expand() abort
   call s:request('expand')
 endfunction
 
+function denippet#anonymous(body) abort
+  call s:request('anonymous', [a:body])
+endfunction
+
 function denippet#jumpable(...) abort
   const dir = a:0 ? a:1 : 1
   return s:request('jumpable', [dir])
@@ -55,11 +59,15 @@ function denippet#to_string(body) abort
   return s:request('snippetToString', [a:body])
 endfunction
 
-function denippet#anonymous(body) abort
-  call s:request('anonymous', [a:body])
-endfunction
-
 function denippet#register_variable(name, cb) abort
   let id = denops#callback#register(a:cb)
   call s:notify('registerVariable', [a:name, id])
+endfunction
+
+function denippet#guard() abort
+  call s:request('guard')
+endfunction
+
+function denippet#unguard() abort
+  call s:request('unguard')
 endfunction

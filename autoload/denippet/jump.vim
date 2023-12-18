@@ -7,26 +7,23 @@
 function denippet#jump#move(position) abort
   let pos = [a:position.line + 1, a:position.character + 1]
 
-  let eventignore = &eventignore
   let cmd = ''
-  let cmd .= "\<Cmd>set eventignore=all\<CR>"
+  let cmd .= "\<Cmd>call denippet#guard()\<CR>"
   if ['s', 'S', '']->index(mode()) >= 0
     let cmd .= "\<Esc>i"
   endif
   let cmd .= printf("\<Cmd>call cursor(%s, %s)\<CR>", pos[0], pos[1])
-  let cmd .= printf("\<Cmd>set eventignore=%s\<CR>", eventignore)
+  let cmd .= "\<Cmd>call denippet#unguard()\<CR>"
   call feedkeys(cmd, 'ni')
 endfunction
 
-function denippet#jump#select(range) abort
+function denippet#jump#select(range, eventignore = v:false) abort
   const start = [a:range.start.line + 1, a:range.start.character + 1]
   const end = [a:range.end.line + 1, a:range.end.character + 1]
 
-  let virtualedit = &virtualedit
-  let eventignore = &eventignore
   let cmd = ''
   let cmd .= "\<Cmd>set virtualedit=onemore\<CR>"
-  let cmd .= "\<Cmd>set eventignore=all\<CR>"
+  let cmd .= "\<Cmd>call denippet#guard()\<CR>"
   if ['i', 's', 'S', '']->index(mode()[0]) >= 0
     let cmd .= "\<Esc>"
   endif
@@ -37,7 +34,7 @@ function denippet#jump#select(range) abort
     let cmd .= 'h'
   endif
   let cmd .= "\<C-g>"
-  let cmd .= printf("\<Cmd>set virtualedit=%s\<CR>", virtualedit)
-  let cmd .= printf("\<Cmd>set eventignore=%s\<CR>", eventignore)
+  let cmd .= printf("\<Cmd>set virtualedit=%s\<CR>", &virtualedit)
+  let cmd .= "\<Cmd>call denippet#unguard()\<CR>"
   call feedkeys(cmd, 'ni')
 endfunction

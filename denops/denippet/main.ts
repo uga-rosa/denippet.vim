@@ -158,7 +158,6 @@ export function main(denops: Denops): void {
       }
       session.guard();
       await session.jump(dir);
-      await denops.cmd("do InsertLeave");
       session.unguard();
       if (
         session.snippet?.currentNode().tabstop === 0 &&
@@ -213,6 +212,14 @@ export function main(denops: Denops): void {
         return retval;
       };
       register(name, cb);
+    },
+
+    guard(): void {
+      session.guard();
+    },
+
+    unguard(): void {
+      session.unguard();
     },
   };
 }
