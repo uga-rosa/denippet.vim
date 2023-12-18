@@ -16,9 +16,11 @@ type CompleteItem = {
 
 type SearchResult = {
   prefix: string;
+  matched?: RegExpMatchArray;
   body: NormalizedSnippet["body"];
 } | {
   prefix?: undefined;
+  matched?: undefined;
   body?: undefined;
 };
 
@@ -34,10 +36,15 @@ async function searchSnippet(
     snippet.prefix.forEach((prefix) => {
       if (
         lineBeforeCursor.endsWith(prefix) &&
-        (bestMatch.prefix == null ||
-          prefix.length > bestMatch.prefix.length)
+        prefix.length > (bestMatch.prefix?.length ?? 0)
       ) {
         bestMatch = { prefix, body: snippet.body };
+      }
+    });
+    snippet.prefix_regexp.forEach((regexp) => {
+      const matched = regexp.exec(lineBeforeCursor);
+      if (matched && matched[0].length > (bestMatch.prefix?.length ?? 0)) {
+        bestMatch = { prefix: matched[0], matched, body: snippet.body };
       }
     });
   });
@@ -94,11 +101,11 @@ export function main(denops: Denops): void {
     },
 
     async expand(): Promise<void> {
-      const { prefix, body } = await searchSnippet(loader);
+      const { prefix, matched, body } = await searchSnippet(loader);
       if (body == null) {
         return;
       }
-      const bodyStr = typeof body == "string" ? body : await body(denops);
+      const bodyStr = is.String(body) ? body : await body(denops, matched);
       await this.anonymous(bodyStr, prefix);
     },
 

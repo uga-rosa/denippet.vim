@@ -9,6 +9,7 @@ type ifKeyword = u.PredicateType<typeof isIfKeyword>;
 
 const isRawSnippet = is.ObjectOf({
   prefix: is.OptionalOf(isStringOrArray),
+  prefix_regexp: is.OptionalOf(isStringOrArray),
   body: isStringOrArray,
   description: is.OptionalOf(isStringOrArray),
   if: is.OptionalOf(isIfKeyword),
@@ -17,9 +18,12 @@ const isRawSnippet = is.ObjectOf({
 
 export type RawSnippet = u.PredicateType<typeof isRawSnippet>;
 
-function isBodyFunc(
-  x: unknown,
-): x is (denops: Denops) => string | string[] | Promise<string | string[]> {
+type BodyFunc = (
+  denops: Denops,
+  matched?: RegExpMatchArray,
+) => string | string[] | Promise<string | string[]>;
+
+function isBodyFunc(x: unknown): x is BodyFunc {
   return typeof x == "function";
 }
 
@@ -31,6 +35,7 @@ function isIfFunc(
 
 const isTSSnippet = is.ObjectOf({
   prefix: is.OptionalOf(isStringOrArray),
+  prefix_regexp: is.OptionalOf(isStringOrArray),
   body: is.OneOf([isStringOrArray, isBodyFunc]),
   description: is.OptionalOf(isStringOrArray),
   if: is.OptionalOf(is.OneOf([isIfKeyword, isIfFunc])),
@@ -59,7 +64,8 @@ function langToFt(lang: string): string {
 export type NormalizedSnippet = {
   name: string;
   prefix: string[];
-  body: string | ((denops: Denops) => Promise<string>);
+  prefix_regexp: RegExp[];
+  body: string | ((denops: Denops, matched?: RegExpMatchArray) => Promise<string>);
   description: string;
   if?: ifKeyword | u.PredicateType<typeof isIfFunc>;
   eval?: string;
@@ -143,9 +149,10 @@ export class Loader {
         ...snip,
         name,
         prefix: toArray(snip.prefix ?? name),
-        body: async (denops: Denops) => {
+        prefix_regexp: toArray(snip.prefix_regexp ?? []).map((pat) => new RegExp(pat + "$")),
+        body: async (denops: Denops, matched?: RegExpMatchArray) => {
           return toString(
-            typeof snip.body == "function" ? await snip.body(denops) : snip.body,
+            typeof snip.body == "function" ? await snip.body(denops, matched) : snip.body,
           );
         },
         description: toString(snip.description),
@@ -163,6 +170,7 @@ export class Loader {
           ...snip,
           name,
           prefix: toArray(snip.prefix ?? name),
+          prefix_regexp: toArray(snip.prefix_regexp ?? []).map((pat) => new RegExp(pat + "$")),
           body: toString(snip.body),
           description: toString(snip.description),
         }));
@@ -175,6 +183,7 @@ export class Loader {
             ...snippet,
             name,
             prefix: toArray(snippet.prefix ?? name),
+            prefix_regexp: [],
             body: toString(snippet.body),
             description: toString(snippet.description),
           };
