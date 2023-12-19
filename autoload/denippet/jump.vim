@@ -11,6 +11,8 @@ function denippet#jump#move(position) abort
   let cmd .= "\<Cmd>call denippet#guard()\<CR>"
   if ['s', 'S', '']->index(mode()) >= 0
     let cmd .= "\<Esc>i"
+  elseif mode() ==# 'i'
+    let cmd .= "\<Cmd>do InsertLeave\<CR>"
   endif
   let cmd .= printf("\<Cmd>call cursor(%s, %s)\<CR>", pos[0], pos[1])
   let cmd .= "\<Cmd>call denippet#unguard()\<CR>"
