@@ -1,16 +1,11 @@
 function s:regex_builder(prefix) abort
-  let regex = '\V\%('
-  let fixed = []
+  let patterns = []
   for p in a:prefix
-    if p->len() > 1
-      call add(fixed, strcharpart(p, 0, 1) . '\%[' . strcharpart(p, 1) . ']')
-    else
-      call add(fixed, p)
-    endif
+    let chars = p->escape('\/?')->split('\zs')
+    let chars_pattern = '\%(' . chars->join('\|') . '\)'
+    call add(patterns, printf('%s%s\*', chars[0], chars_pattern))
   endfor
-  let regex .= fixed->join('\|')
-  let regex .= '\)\_$'
-  return regex
+  return '\V\%(' . patterns->join('\|') . '\)\_$'
 endfunction
 
 function denippet#load#base(prefix) abort
