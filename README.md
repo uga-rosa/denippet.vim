@@ -44,13 +44,13 @@ if ($1) {
 ![nested-expand](https://github.com/uga-rosa/denippet.vim/assets/82267684/73c5b6ff-a6af-4877-a674-83d3bd6fe36d)
 
 ```typescript
-import { TSSnippet } from "https://deno.land/x/denippet_vim@v0.3.1/loader.ts";
-import { Denops, fn } from "https://deno.land/x/denippet_vim@v0.3.1/deps/denops.ts";
+import { TSSnippet } from "https://deno.land/x/denippet_vim@v0.5.1/loader.ts";
+import { fn } from "https://deno.land/x/denippet_vim@v0.5.1/deps/denops.ts";
 
 export const snippets: Record<string, TSSnippet> = {
   "autoload function": {
     prefix: "fn",
-    body: async (denops: Denops) => {
+    body: async (denops) => {
       const path = await fn.expand(denops, "%:p") as string;
       const match = path.match(/autoload\/(.+)\.vim$/);
       const prefix = match ? match[1].replaceAll("/", "#") + "#" : "";
@@ -64,3 +64,26 @@ export const snippets: Record<string, TSSnippet> = {
 };
 ```
 ![autoload-function](https://github.com/uga-rosa/denippet.vim/assets/82267684/463df60e-f1d3-4e7d-acb3-1f4d8e9566d4)
+
+```typescript
+import { TSSnippet } from "https://deno.land/x/denippet_vim@v0.5.1/loader.ts";
+
+export const snippets: Record<string, TSSnippet> = {
+  "for (postfix)": {
+    prefix: ".for",
+    prefix_regexp: "([a-zA-Z$_][a-zA-Z0-9$_]*).for",
+    body: (_denops, matched) => {
+      const variable = matched?.[1];
+      if (variable == null) {
+        return [];
+      }
+      return [
+        `for (const \${1:s} of ${variable}) {`,
+        `\t$0`,
+        `}`,
+      ];
+    },
+  },
+};
+```
+![prefix_regexp](https://github.com/uga-rosa/denippet.vim/assets/82267684/532de77e-2084-44a6-aaea-8b9665e6d251)
