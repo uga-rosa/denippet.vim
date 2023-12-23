@@ -4,7 +4,10 @@ import { Denops, fn, op } from "./deps/denops.ts";
 import { is } from "./deps/unknownutil.ts";
 import { trimBaseIndent } from "./indent.ts";
 
-export type VariableFunc = (denops: Denops, text: string) => string | Promise<string>;
+export type VariableFunc = (
+  denops: Denops,
+  text: string,
+) => string | Promise<string>;
 
 const Cell: Record<string, VariableFunc> = {};
 
@@ -20,8 +23,7 @@ export async function call(
   name: string,
   text: string,
 ): Promise<string> {
-  const evaled = await Cell[name]?.(denops, text);
-  return evaled ? evaled : text;
+  return await Cell[name]?.(denops, text);
 }
 
 /** The currently selected text or the empty string */
@@ -188,7 +190,7 @@ register("RANDOM_HEX", () => {
 register("UUID", () => crypto.randomUUID());
 
 /** Example output: in PHP /* or in HTML <!-- */
-register("BLOCK_COMMENT_START", async (denops, text) => {
+register("BLOCK_COMMENT_START", async (denops) => {
   const commentstring = await op.commentstring.get(denops);
   if (!commentstring.endsWith("%s")) {
     return commentstring.split("%s")[0];
@@ -202,11 +204,11 @@ register("BLOCK_COMMENT_START", async (denops, text) => {
       blockCommentStart = str;
     }
   });
-  return blockCommentStart ?? text;
+  return blockCommentStart ?? "";
 });
 
 /** Example output: in PHP *\/ or in HTML --> */
-register("BLOCK_COMMENT_END", async (denops, text) => {
+register("BLOCK_COMMENT_END", async (denops) => {
   const commentstring = await op.commentstring.get(denops);
   if (!commentstring.endsWith("%s")) {
     return commentstring.split("%s")[1];
@@ -220,14 +222,14 @@ register("BLOCK_COMMENT_END", async (denops, text) => {
       blockCommentStart = str;
     }
   });
-  return blockCommentStart ?? text;
+  return blockCommentStart ?? "";
 });
 
 /** Example output: in PHP // */
-register("LINE_COMMENT", async (denops, text) => {
+register("LINE_COMMENT", async (denops) => {
   const commentstring = await op.commentstring.get(denops);
   if (commentstring.endsWith("%s")) {
     return commentstring.replace("%s", "");
   }
-  return text;
+  return "";
 });
