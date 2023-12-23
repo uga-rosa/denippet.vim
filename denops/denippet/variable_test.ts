@@ -300,5 +300,14 @@ test({
         assertEquals(actual, "2");
       },
     });
+
+    await t.step({
+      name: "default",
+      fn: async () => {
+        await denops.cmd(`set commentstring=`);
+        const actual = await V.call(denops, "LINE_COMMENT", "--");
+        assertEquals(actual, "--");
+      },
+    });
   },
 });
