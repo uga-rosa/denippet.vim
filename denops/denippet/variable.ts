@@ -7,7 +7,7 @@ import { trimBaseIndent } from "./indent.ts";
 export type VariableFunc = (
   denops: Denops,
   text: string,
-) => string | Promise<string>;
+) => string | undefined | Promise<string | undefined>;
 
 const Cell: Record<string, VariableFunc> = {};
 
@@ -23,7 +23,12 @@ export async function call(
   name: string,
   text: string,
 ): Promise<string> {
-  return await Cell[name]?.(denops, text);
+  try {
+    const evaled = await Cell[name]?.(denops, text);
+    return evaled ? evaled : text;
+  } catch {
+    return "";
+  }
 }
 
 /** The currently selected text or the empty string */
@@ -52,22 +57,22 @@ register("TM_LINE_NUMBER", async (denops) => {
 
 /** The filename of the current document */
 register("TM_FILENAME", async (denops) => {
-  return (await fn.expand(denops, "%:p:t")) as string;
+  return String(await fn.expand(denops, "%:p:t"));
 });
 
 /** The filename of the current document without its extensions */
 register("TM_FILENAME_BASE", async (denops) => {
-  return (await fn.expand(denops, "%:p:t:r")) as string;
+  return String(await fn.expand(denops, "%:p:t:r"));
 });
 
 /** The directory of the current document */
 register("TM_DIRECTORY", async (denops) => {
-  return (await fn.expand(denops, "%:p:h:t")) as string;
+  return String(await fn.expand(denops, "%:p:h:t"));
 });
 
 /** The full file path of the current document */
 register("TM_FILEPATH", async (denops) => {
-  return (await fn.expand(denops, "%:p")) as string;
+  return String(await fn.expand(denops, "%:p"));
 });
 
 /**
@@ -75,16 +80,15 @@ register("TM_FILEPATH", async (denops) => {
  * the current document
  */
 register("RELATIVE_FILEPATH", async (denops) => {
-  return (await fn.expand(denops, "%")) as string;
+  return String(await fn.expand(denops, "%"));
 });
 
 /** The contents of your clipboard */
-register("CLIPBOARD", async (denops, text) => {
-  const clipboard = await fn.getreg(denops) as string;
+register("CLIPBOARD", async (denops) => {
+  const clipboard = await fn.getreg(denops);
   if (is.String(clipboard)) {
     return trimBaseIndent(clipboard);
   }
-  return text;
 });
 
 /** The name of the opened workspace or folder */
@@ -204,7 +208,7 @@ register("BLOCK_COMMENT_START", async (denops) => {
       blockCommentStart = str;
     }
   });
-  return blockCommentStart ?? "";
+  return blockCommentStart;
 });
 
 /** Example output: in PHP *\/ or in HTML --> */
@@ -222,7 +226,7 @@ register("BLOCK_COMMENT_END", async (denops) => {
       blockCommentStart = str;
     }
   });
-  return blockCommentStart ?? "";
+  return blockCommentStart;
 });
 
 /** Example output: in PHP // */
@@ -231,21 +235,16 @@ register("LINE_COMMENT", async (denops) => {
   if (commentstring.endsWith("%s")) {
     return commentstring.replace("%s", "");
   }
-  return "";
 });
 
 register("VIM", async (denops, text) => {
-  return String(await denops.eval(text).catch(() => ""));
+  return String(await denops.eval(text));
 });
 
 register("LUA", async (denops, text) => {
-  return String(await denops.call("luaeval", text).catch(() => ""));
+  return String(await denops.call("luaeval", text));
 });
 
 register("JS", (_denops, text) => {
-  try {
-    return String(eval(text));
-  } catch {
-    return "";
-  }
+  return String(eval(text));
 });
