@@ -284,7 +284,7 @@ Variables ~
 	${VIM:['foo', 'bar'][0]}
 	// -> foo
 <
-	- LUA		Eval default string as Lua. >
+	- LUA		Eval default string as Lua (only Neovim). >
 	${LUA:math.floor(1.234)}
 	// -> 1
 <
