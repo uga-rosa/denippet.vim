@@ -274,5 +274,23 @@ test({
         assertEquals(actual, "//");
       },
     });
+
+    await t.step({
+      name: "VIM",
+      fn: async () => {
+        const actual = await V.call(denops, "VIM", "['foo', 'bar'][0]");
+        assertEquals(actual, "foo");
+      },
+    });
+
+    if (denops.meta.host === "nvim") {
+      await t.step({
+        name: "LUA",
+        fn: async () => {
+          const actual = await V.call(denops, "LUA", "math.floor(1.234)");
+          assertEquals(actual, "1");
+        },
+      });
+    }
   },
 });

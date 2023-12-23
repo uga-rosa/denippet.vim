@@ -279,6 +279,16 @@ Variables ~
 	A list of variables is here.
 	https://code.visualstudio.com/docs/editor/userdefinedsnippets#_variables
 
+	The original variables are as follows:
+	- VIM		Eval default string as Vim script. >
+	${VIM:['foo', 'bar'][0]}
+	// -> foo
+<
+	- LUA		Eval default string as Lua. >
+	${LUA:math.floor(1.234)}
+	// -> 1
+<
+
 Transformer ~
 
 Variable-Transform ~

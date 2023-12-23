@@ -233,3 +233,11 @@ register("LINE_COMMENT", async (denops) => {
   }
   return "";
 });
+
+register("VIM", async (denops, text) => {
+  return String(await denops.eval(text).catch(() => ""));
+});
+
+register("LUA", async (denops, text) => {
+  return String(await denops.call("luaeval", text).catch(() => ""));
+});
