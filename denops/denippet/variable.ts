@@ -241,3 +241,11 @@ register("VIM", async (denops, text) => {
 register("LUA", async (denops, text) => {
   return String(await denops.call("luaeval", text).catch(() => ""));
 });
+
+register("JS", (_denops, text) => {
+  try {
+    return String(eval(text));
+  } catch {
+    return "";
+  }
+});

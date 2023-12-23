@@ -288,6 +288,10 @@ Variables ~
 	${LUA:math.floor(1.234)}
 	// -> 1
 <
+	- JS		Eval default string as JavaScript. >
+	${JS:(() => 1 + 1)()}
+	// -> 2
+<
 
 Transformer ~
 

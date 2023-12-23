@@ -292,5 +292,13 @@ test({
         },
       });
     }
+
+    await t.step({
+      name: "JS",
+      fn: async () => {
+        const actual = await V.call(denops, "JS", "(() => 1 + 1)()");
+        assertEquals(actual, "2");
+      },
+    });
   },
 });
