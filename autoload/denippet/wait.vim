@@ -5,7 +5,7 @@
 " https://github.com/vim-denops/denops.vim/blob/6c7ebef6f71b948a152c09bd844fba00f8fee3d6/autoload/denops/_internal/wait.vim
 
 function denippet#wait#wait(timeout, condition, interval) abort
-  call s:wait(a:timeout, a:condition, a:interval)
+  call s:wait(a:timeout, { -> eval(a:condition) }, a:interval)
 endfunction
 
 if exists('*wait')
