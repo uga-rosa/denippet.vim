@@ -23,3 +23,8 @@ snoremap <Plug>(denippet-jump-prev) <Cmd>call denippet#jump(-1)<CR>
 
 inoremap <Plug>(denippet-choice-next) <Cmd>call denippet#choice(+1)<CR>
 inoremap <Plug>(denippet-choice-prev) <Cmd>call denippet#choice(-1)<CR>
+
+" Empty autocmd for :do
+au InsertLeave * :
+au ModeChanged *:n :
+au User DenippetNodeEnter,DenippetNodeLeave,DenippetChoiceSelected :
