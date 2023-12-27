@@ -81,9 +81,9 @@ export class Session {
       snippet = snippet.outer;
       if (snippet && innerSnippetNode) {
         const node = snippet.currentNode();
-        node.range = innerSnippetNode.range;
+        node.range!.end = innerSnippetNode.range!.end;
         if (node.type === "tabstop" || node.type === "placeholder") {
-          node.input = await innerSnippetNode.getText();
+          node.input += await innerSnippetNode.getText();
         }
       }
     }
