@@ -24,7 +24,9 @@ export class Session {
       // No jumpable nodes or only $0
       await clearExtmark(this.denops);
       if (this.snippet != null) {
-        await this.snippet.currentNode().updateInput(snippet.snippet.range);
+        const range = this.snippet.currentNode().range!;
+        range.end = snippet.snippet.range!.end;
+        await this.snippet.currentNode().updateInput(range);
         await this.snippet.currentNode().setExtmark();
         await this.snippet.setVar();
       }
