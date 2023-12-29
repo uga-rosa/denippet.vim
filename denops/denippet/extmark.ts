@@ -101,20 +101,20 @@ export async function getExtmarks(
       end: boolean;
     }[];
 
+    if (props.length === 0) {
+      return [];
+    }
+
     const extmarks: Extmark[] = [];
-    for (let prop of props) {
-      if (!prop.start) {
-        continue;
+    for (let i = 0; i < props.length; i++) {
+      if (props[i].start) {
+        const start = { line: props[i].lnum - 1, character: props[i].col - 1 };
+        while (!props[i].end) {
+          i++;
+        }
+        const end = { line: props[i].lnum - 1, character: props[i].col - 1 };
+        extmarks.push({ extmarkId: props[i].id, range: { start, end } });
       }
-      const start = { line: prop.lnum - 1, character: prop.col - 1 };
-      while (!prop.end) {
-        prop = await vim.prop_find(denops, {
-          type: propType,
-          lnum: prop.lnum + 1,
-        }) as typeof props[number];
-      }
-      const range = { start, end: { line: prop.lnum - 1, character: prop.col + prop.length - 1 } };
-      extmarks.push({ extmarkId: prop.id, range });
     }
     return extmarks;
   }
