@@ -62,6 +62,15 @@ type Extmark = {
   range: LSP.Range; // utf8 offset, 0-index
 };
 
+type Prop = {
+  lnum: number;
+  col: number;
+  length: number;
+  id: number;
+  start: boolean;
+  end: boolean;
+};
+
 export async function getExtmarks(
   denops: Denops,
   lnum?: number,
@@ -90,31 +99,31 @@ export async function getExtmarks(
     const range = lnum == null ? [1, -1] : [lnum + 1, lnum + 1];
     const propType = await ensurePropType(denops);
     const props = await vim.prop_list(denops, range[0], {
-      end_lnum: range[1],
       type: propType,
-    }) as {
-      lnum: number;
-      col: number;
-      length: number;
-      id: number;
-      start: boolean;
-      end: boolean;
-    }[];
-
-    if (props.length === 0) {
-      return [];
-    }
+      end_lnum: range[1],
+    }) as Prop[];
 
     const extmarks: Extmark[] = [];
-    for (let i = 0; i < props.length; i++) {
-      if (props[i].start) {
-        const start = { line: props[i].lnum - 1, character: props[i].col - 1 };
-        while (!props[i].end) {
-          i++;
-        }
-        const end = { line: props[i].lnum - 1, character: props[i].col - 1 };
-        extmarks.push({ extmarkId: props[i].id, range: { start, end } });
+    for (let prop of props) {
+      if (!prop.start) {
+        continue;
       }
+      const start = { line: prop.lnum - 1, character: prop.col - 1 };
+      let i = 0;
+      while (!prop.end) {
+        const lnum = prop.lnum + 1;
+        const ends = await vim.prop_list(
+          denops,
+          lnum,
+          { type: propType },
+        ) as Omit<Prop, "lnum">[];
+        if (ends.length > 0) {
+          prop = { lnum, ...ends[0] };
+        }
+        i++;
+      }
+      const end = { line: prop.lnum - 1, character: prop.col + prop.length - 1 };
+      extmarks.push({ extmarkId: prop.id, range: { start, end } });
     }
     return extmarks;
   }
