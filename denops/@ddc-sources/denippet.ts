@@ -11,6 +11,7 @@ import {
 } from "https://deno.land/x/ddc_vim@v4.3.1/base/source.ts";
 import { Denops, op } from "../denippet/deps/denops.ts";
 import { splitLines } from "../denippet/util.ts";
+import { lsputil } from "../denippet/deps/lsp.ts";
 
 type Params = Record<PropertyKey, never>;
 
@@ -51,9 +52,8 @@ export class Source extends BaseSource<Params> {
     } else if (completed_event === "undefined") {
       // native-ui
       const itemWord = await denops.eval(`v:completed_item.word`) as string;
-      const beforeLine = await denops.eval(
-        `getline('.')[:col('.')-2]`,
-      ) as string;
+      const ctx = await lsputil.LineContext.create(denops);
+      const beforeLine = ctx.text.slice(0, ctx.character);
       if (!beforeLine.endsWith(itemWord)) {
         return;
       }
