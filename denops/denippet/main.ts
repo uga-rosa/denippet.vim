@@ -104,6 +104,21 @@ export function main(denops: Denops): void {
       }
     },
 
+    setDirect(prefixU: unknown, bodyU: unknown, filetypesU: unknown): void {
+      const prefix = u.ensure(prefixU, is.ArrayOf(is.String));
+      const body = u.ensure(bodyU, is.String);
+      const filetypes = u.ensure(filetypesU, is.ArrayOf(is.String));
+      const snippet: NormalizedSnippet = {
+        id: loader.getId(),
+        filetypes,
+        prefix,
+        prefix_regexp: [],
+        body,
+        description: "",
+      };
+      loader.set([snippet]);
+    },
+
     async expandable(): Promise<boolean> {
       const { body } = await searchSnippet(loader);
       return body != null;
