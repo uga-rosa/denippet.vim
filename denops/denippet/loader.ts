@@ -3,7 +3,7 @@ import { path, TOML, YAML } from "./deps/std.ts";
 import { is, u } from "./deps/unknownutil.ts";
 import { asyncFilter } from "./util.ts";
 
-const isStringOrArray = is.OneOf([is.String, is.ArrayOf(is.String)]);
+const isStringOrArray = is.UnionOf([is.String, is.ArrayOf(is.String)]);
 const isIfKeyword = is.LiteralOneOf(["base", "start", "vimscript", "lua"] as const);
 type ifKeyword = u.PredicateType<typeof isIfKeyword>;
 
@@ -36,9 +36,9 @@ function isIfFunc(
 const isTSSnippet = is.ObjectOf({
   prefix: is.OptionalOf(isStringOrArray),
   prefix_regexp: is.OptionalOf(isStringOrArray),
-  body: is.OneOf([isStringOrArray, isBodyFunc]),
+  body: is.UnionOf([isStringOrArray, isBodyFunc]),
   description: is.OptionalOf(isStringOrArray),
-  if: is.OptionalOf(is.OneOf([isIfKeyword, isIfFunc])),
+  if: is.OptionalOf(is.UnionOf([isIfKeyword, isIfFunc])),
   eval: is.OptionalOf(is.String),
 });
 
