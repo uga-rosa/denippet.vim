@@ -143,7 +143,7 @@ export class Loader {
     if (extension === "ts") {
       const content = await import(path.toFileUrl(filepath).toString())
         .then((module) => module.snippets);
-      u.assert(content, is.RecordOf(isTSSnippet));
+      u.assert(content, is.RecordLikeOf(isTSSnippet));
       const snippets = Object.entries(content).map(([name, snip]) => ({
         ...snip,
         id: this.getId(),
@@ -166,7 +166,7 @@ export class Loader {
           : extension === "toml"
           ? TOML.parse(raw)
           : YAML.parse(raw);
-        u.assert(content, is.RecordOf(isRawSnippet));
+        u.assert(content, is.RecordLikeOf(isRawSnippet));
         const snippets = Object.entries(content).map(([name, snip]) => ({
           ...snip,
           id: this.getId(),
@@ -179,7 +179,7 @@ export class Loader {
         this.set(snippets);
       } else if (extension === "code-snippets") {
         const content = JSON.parse(raw);
-        u.assert(content, is.RecordOf(isGlobalSnippet));
+        u.assert(content, is.RecordLikeOf(isGlobalSnippet));
         const snippets = Object.entries(content).map(([name, snippet]) => {
           const ft = snippet.scope ? snippet.scope.split(",").map(langToFt) : ["*"];
           return {
