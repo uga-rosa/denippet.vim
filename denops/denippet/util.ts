@@ -1,7 +1,5 @@
-import { batch, Denops } from "./deps/denops.ts";
-import { LSP, lsputil } from "./deps/lsp.ts";
+import { batch, Denops, Keymap, q } from "./deps/denops.ts";
 import { is } from "./deps/unknownutil.ts";
-import { getExtmarks, setExtmark } from "./extmark.ts";
 
 export async function echoerr(
   denops: Denops,
@@ -34,11 +32,6 @@ export function splitLines(text: string): string[] {
   return normalizeNewline(text).split("\n");
 }
 
-const ENCODER = new TextEncoder();
-function byteLength(str: string): number {
-  return ENCODER.encode(str).length;
-}
-
 /**
  * Fix extmarks position
  *
@@ -58,55 +51,9 @@ export async function linePatch(
   after: number,
   insertText: string,
 ): Promise<void> {
-  const cursor16 = await lsputil.getCursor(denops);
-  const cursor = await lsputil.toUtf8Position(denops, 0, cursor16, "utf-16");
-  const lines = splitLines(insertText);
-
-  function shift(pos: LSP.Position): LSP.Position {
-    if (lines.length > 1) {
-      return {
-        line: pos.line + lines.length - 1,
-        character: byteLength(lines[lines.length - 1]) + pos.character - cursor.character - after,
-      };
-    } else {
-      return {
-        line: pos.line,
-        character: pos.character - before - after + byteLength(insertText),
-      };
-    }
-  }
-
-  // Save and adjust extmarks
-  const extmarks = (await getExtmarks(denops, cursor.line)).map((mark) => {
-    let start = mark.range.start;
-    let end = mark.range.end;
-
-    if (start.character > cursor.character + after) {
-      // 6
-      start = shift(start);
-    } else if (start.character > cursor.character - before) {
-      // 4 and 5
-      start.character = cursor.character - before;
-    }
-
-    const beforePos = { ...cursor };
-    beforePos.character -= before;
-    const afterPos = { ...cursor };
-    afterPos.character += after;
-    if (lsputil.isPositionBefore(afterPos, end)) {
-      // 3, 5 and 6
-      end = shift(end);
-    } else if (lsputil.isPositionBefore(beforePos, end, true)) {
-      // 2 and 4
-      end = shift(afterPos);
-    }
-    return { ...mark, range: { start, end } };
-  });
-
-  await lsputil.linePatch(denops, before, after, insertText);
-
-  // Restore extmarks
-  for (const mark of extmarks) {
-    await setExtmark(denops, mark.range, mark.extmarkId);
-  }
+  await Keymap.send(denops, [
+    q`${q`\<C-g>U\<Left>\<Del>`.repeat(before)}`,
+    q`${q`\<Del>`.repeat(after)}`,
+    q`${insertText.replaceAll("\n", "\n\\<C-u>")}`,
+  ]);
 }

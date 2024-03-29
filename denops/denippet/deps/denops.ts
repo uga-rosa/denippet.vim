@@ -7,5 +7,7 @@ export { b, g } from "https://deno.land/x/denops_std@v6.3.0/variable/variable.ts
 export * as au from "https://deno.land/x/denops_std@v6.3.0/autocmd/mod.ts";
 export * as lambda from "https://deno.land/x/denops_std@v6.3.0/lambda/mod.ts";
 export { batch } from "https://deno.land/x/denops_std@v6.3.0/batch/mod.ts";
+export * as Keymap from "https://deno.land/x/denops_std@v6.3.0/helper/keymap.ts";
+export { exprQuote as q } from "https://deno.land/x/denops_std@v6.3.0/helper/expr_string.ts";
 
 export { test } from "https://deno.land/x/denops_test@v1.6.2/mod.ts";

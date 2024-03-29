@@ -21,11 +21,11 @@ function denippet#expandable() abort
 endfunction
 
 function denippet#expand() abort
-  call s:request('expand')
+  call s:notify('expand')
 endfunction
 
 function denippet#anonymous(body) abort
-  call s:request('anonymous', [a:body])
+  call s:notify('anonymous', [a:body])
 endfunction
 
 function denippet#jumpable(...) abort
