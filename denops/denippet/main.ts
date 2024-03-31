@@ -95,7 +95,7 @@ export function main(denops: Denops): void {
       const filepath = u.ensure(filepathU, is.String);
       const filetype = u.ensure(
         filetypeU,
-        is.OneOf([is.String, is.ArrayOf(is.String)]),
+        is.UnionOf([is.String, is.ArrayOf(is.String)]),
       );
       try {
         await loader.load(filepath, filetype);
@@ -135,7 +135,7 @@ export function main(denops: Denops): void {
     },
 
     async anonymous(bodyU: unknown, prefixU: unknown): Promise<void> {
-      const body = normalizeNewline(u.ensure(bodyU, is.OneOf([is.String, is.ArrayOf(is.String)])));
+      const body = normalizeNewline(u.ensure(bodyU, is.UnionOf([is.String, is.ArrayOf(is.String)])));
       const prefix = u.ensure(prefixU, is.OptionalOf(is.String));
       if (await session.expand(body, prefix)) {
         const syncDelay = Number(await g.get(denops, "denippet_sync_delay"));
