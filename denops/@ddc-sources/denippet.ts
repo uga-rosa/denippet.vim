@@ -9,7 +9,7 @@ import {
   GetPreviewerArguments,
   OnCompleteDoneArguments,
 } from "https://deno.land/x/ddc_vim@v4.3.1/base/source.ts";
-import { Denops, op } from "../denippet/deps/denops.ts";
+import { Denops, fn, op, q, useExprString } from "../denippet/deps/denops.ts";
 import { splitLines } from "../denippet/util.ts";
 import { lsputil } from "../denippet/deps/lsp.ts";
 
@@ -59,7 +59,9 @@ export class Source extends BaseSource<Params> {
       }
     }
 
-    await denops.dispatch("denippet", "expand", userData.denippet.id);
+    await useExprString(denops, async (denops) => {
+      await fn.feedkeys(denops, q`\<Cmd>call denippet#expand("${userData.denippet.id}")\<CR>`);
+    });
     await denops.call("ddc#skip_next_complete");
   }
 

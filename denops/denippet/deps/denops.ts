@@ -11,6 +11,7 @@ export * as Keymap from "https://deno.land/x/denops_std@v6.4.0/helper/keymap.ts"
 export {
   exprQuote as q,
   type ExprString,
+  useExprString,
 } from "https://deno.land/x/denops_std@v6.4.0/helper/expr_string.ts";
 
 export { test } from "https://deno.land/x/denops_test@v1.6.2/mod.ts";

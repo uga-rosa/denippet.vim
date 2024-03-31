@@ -20,8 +20,8 @@ function denippet#expandable() abort
   return s:request('expandable')
 endfunction
 
-function denippet#expand() abort
-  call s:notify('expand')
+function denippet#expand(...) abort
+  call s:notify('expand', a:000)
 endfunction
 
 function denippet#anonymous(body) abort
