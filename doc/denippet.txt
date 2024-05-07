@@ -90,9 +90,8 @@ denippet#jump([{dir}])					*denippet#jump()*
 	Same as |<Plug>(denippet-jump-next)| and |<Plug>(denippet-jump-prev)|.
 
 
-denippet#choosable([{dir}])				*denippet#choosable()*
-	{dir} where 1 means "next" and -1 means "previous".
-	Return |v:true| if choice is possible, |v:false| otherwise.
+denippet#choosable()					*denippet#choosable()*
+	Return |v:true| if current node is choiceNode, |v:false| otherwise.
 
 
 denippet#choice([{dir}])				*denippet#choice()*
