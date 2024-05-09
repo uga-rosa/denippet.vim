@@ -228,6 +228,24 @@ export function main(denops: Denops): void {
       return parsed;
     },
 
+    async snippetIdToString(idU: unknown): Promise<string> {
+      const id = u.ensure(idU, is.String);
+      const parsed = lsputil.parseSnippet(id);
+      if (parsed === "") {
+        throw new Error(`Failed parsing: ${id}`);
+      }
+      const { body, matched } = await searchSnippet(loader, id);
+
+      switch (true) {
+        case is.Nullish(body):
+          return "";
+        case is.String(body):
+          return body;
+        default:
+          return await body(denops, matched);
+      }
+    },
+
     registerVariable(nameU: unknown, idU: unknown): void {
       const name = u.ensure(nameU, is.String);
       const id = u.ensure(idU, is.String);
