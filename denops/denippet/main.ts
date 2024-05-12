@@ -230,20 +230,16 @@ export function main(denops: Denops): void {
 
     async snippetIdToString(idU: unknown): Promise<string> {
       const id = u.ensure(idU, is.String);
-      const parsed = lsputil.parseSnippet(id);
-      if (parsed === "") {
-        throw new Error(`Failed parsing: ${id}`);
-      }
       const { body, matched } = await searchSnippet(loader, id);
-
-      switch (true) {
-        case is.Nullish(body):
-          return "";
-        case is.String(body):
-          return body;
-        default:
-          return await body(denops, matched);
+      if (body == null) {
+        throw new Error(`Unknown snippet id: ${id}`);
       }
+      const bodyStr = is.String(body) ? body : await body(denops, matched);
+      const parsedBody = lsputil.parseSnippet(bodyStr);
+      if (parsedBody === "") {
+        throw new Error(`Failed parsing: ${bodyStr}`);
+      }
+      return parsedBody;
     },
 
     registerVariable(nameU: unknown, idU: unknown): void {
