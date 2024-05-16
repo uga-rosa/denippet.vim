@@ -228,6 +228,20 @@ export function main(denops: Denops): void {
       return parsed;
     },
 
+    async snippetIdToString(idU: unknown): Promise<string> {
+      const id = u.ensure(idU, is.String);
+      const { body, matched } = await searchSnippet(loader, id);
+      if (body == null) {
+        throw new Error(`Unknown snippet id: ${id}`);
+      }
+      const bodyStr = is.String(body) ? body : await body(denops, matched);
+      const parsedBody = lsputil.parseSnippet(bodyStr);
+      if (parsedBody === "") {
+        throw new Error(`Failed parsing: ${bodyStr}`);
+      }
+      return parsedBody;
+    },
+
     registerVariable(nameU: unknown, idU: unknown): void {
       const name = u.ensure(nameU, is.String);
       const id = u.ensure(idU, is.String);

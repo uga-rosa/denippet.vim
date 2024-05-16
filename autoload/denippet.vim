@@ -59,6 +59,10 @@ function denippet#to_string(body) abort
   return s:request('snippetToString', [a:body])
 endfunction
 
+function denippet#to_string_by_id(id) abort
+  return s:request('snippetIdToString', [a:id])
+endfunction
+
 function denippet#register_variable(name, cb) abort
   let id = denops#callback#register(a:cb)
   call s:notify('registerVariable', [a:name, id])
