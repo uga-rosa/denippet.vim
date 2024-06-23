@@ -174,11 +174,6 @@ Fields ~
 		(the key of the object, in the example "For Loop") is used
 		instead. Multiple prefixes can be set for a single snippet by
 		making it an array.
-	"prefix_regexp"		(string|string[])
-		The trigger that are JS regular expression. In TypeScript, you
-		can use the match result in "body". Since "prefix" are used to
-		narrow down the search in completion, please also set the
-		appropriate one when using "prefix_regexp".
 	"body"		(string|string[])	required!
 		The text that is actually expanded. The \t (tab character) at
 		the beginning of a line in "body" is corrected to the

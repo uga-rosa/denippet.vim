@@ -16,11 +16,9 @@ type CompleteItem = {
 
 type SearchResult = {
   prefix: string;
-  matched?: RegExpMatchArray;
   body: NormalizedSnippet["body"];
 } | {
   prefix?: undefined;
-  matched?: undefined;
   body?: undefined;
 };
 
@@ -48,12 +46,6 @@ async function searchSnippet(
         prefix.length > (bestMatch.prefix?.length ?? 0)
       ) {
         bestMatch = { prefix, body: snippet.body };
-      }
-    });
-    snippet.prefix_regexp.forEach((regexp) => {
-      const matched = regexp.exec(lineBeforeCursor);
-      if (matched && matched[0].length > (bestMatch.prefix?.length ?? 0)) {
-        bestMatch = { prefix: matched[0], matched, body: snippet.body };
       }
     });
   });
@@ -112,7 +104,6 @@ export function main(denops: Denops): void {
         id: loader.getId(),
         filetypes,
         prefix,
-        prefix_regexp: [],
         body,
         description: "",
       };
@@ -126,11 +117,11 @@ export function main(denops: Denops): void {
 
     async expand(idU: unknown): Promise<void> {
       const id = u.ensure(idU, is.OptionalOf(is.String));
-      const { prefix, matched, body } = await searchSnippet(loader, id);
+      const { prefix, body } = await searchSnippet(loader, id);
       if (body == null) {
         return;
       }
-      const bodyStr = is.String(body) ? body : await body(denops, matched);
+      const bodyStr = is.String(body) ? body : await body(denops);
       await this.anonymous(bodyStr, prefix);
     },
 
@@ -238,12 +229,12 @@ export function main(denops: Denops): void {
 
     async snippetIdToString(idU: unknown): Promise<string> {
       const id = u.ensure(idU, is.String);
-      const { body, matched } = await searchSnippet(loader, id);
+      const { body } = await searchSnippet(loader, id);
       if (body == null) {
         echoerr(denops, `Unknown snippet id: ${id}`);
         return "";
       }
-      const bodyStr = is.String(body) ? body : await body(denops, matched);
+      const bodyStr = is.String(body) ? body : await body(denops);
       const parsedBody = lsputil.parseSnippet(bodyStr);
       if (parsedBody === "") {
         echoerr(denops, `Failed parsing: ${bodyStr}`);

@@ -9,7 +9,6 @@ type ifKeyword = u.PredicateType<typeof isIfKeyword>;
 
 const isRawSnippet = is.ObjectOf({
   prefix: is.OptionalOf(isStringOrArray),
-  prefix_regexp: is.OptionalOf(isStringOrArray),
   body: isStringOrArray,
   description: is.OptionalOf(isStringOrArray),
   if: is.OptionalOf(isIfKeyword),
@@ -18,24 +17,20 @@ const isRawSnippet = is.ObjectOf({
 
 export type RawSnippet = u.PredicateType<typeof isRawSnippet>;
 
-type BodyFunc = (
-  denops: Denops,
-  matched?: RegExpMatchArray,
-) => string | string[] | Promise<string | string[]>;
+type BodyFunc = (denops: Denops) => string | string[] | Promise<string | string[]>;
 
 function isBodyFunc(x: unknown): x is BodyFunc {
   return typeof x == "function";
 }
 
-function isIfFunc(
-  x: unknown,
-): x is (denops: Denops) => boolean | Promise<boolean> {
+type IfFunc = (denops: Denops) => boolean | Promise<boolean>;
+
+function isIfFunc(x: unknown): x is IfFunc {
   return typeof x == "function";
 }
 
 const isTSSnippet = is.ObjectOf({
   prefix: is.OptionalOf(isStringOrArray),
-  prefix_regexp: is.OptionalOf(isStringOrArray),
   body: is.UnionOf([isStringOrArray, isBodyFunc]),
   description: is.OptionalOf(isStringOrArray),
   if: is.OptionalOf(is.UnionOf([isIfKeyword, isIfFunc])),
@@ -65,10 +60,9 @@ export type NormalizedSnippet = {
   id: string;
   filetypes: string[];
   prefix: string[];
-  prefix_regexp: RegExp[];
-  body: string | ((denops: Denops, matched?: RegExpMatchArray) => Promise<string>);
+  body: string | ((denops: Denops) => Promise<string>);
   description: string;
-  if?: ifKeyword | u.PredicateType<typeof isIfFunc>;
+  if?: ifKeyword | IfFunc;
   eval?: string;
 };
 
@@ -149,12 +143,8 @@ export class Loader {
         id: this.getId(),
         filetypes: toArray(filetype),
         prefix: toArray(snip.prefix ?? name),
-        prefix_regexp: toArray(snip.prefix_regexp ?? []).map((pat) => new RegExp(pat + "$")),
-        body: async (denops: Denops, matched?: RegExpMatchArray) => {
-          return toString(
-            typeof snip.body == "function" ? await snip.body(denops, matched) : snip.body,
-          );
-        },
+        body: async (denops: Denops) =>
+          toString(typeof snip.body == "function" ? await snip.body(denops) : snip.body),
         description: toString(snip.description),
       }));
       this.set(snippets);
@@ -172,7 +162,6 @@ export class Loader {
           id: this.getId(),
           filetypes: toArray(filetype),
           prefix: toArray(snip.prefix ?? name),
-          prefix_regexp: toArray(snip.prefix_regexp ?? []).map((pat) => new RegExp(pat + "$")),
           body: toString(snip.body),
           description: toString(snip.description),
         }));
