@@ -3,12 +3,12 @@ import {
   DdcGatherItems,
   Item,
   Previewer,
-} from "https://deno.land/x/ddc_vim@v4.3.1/types.ts";
+} from "https://deno.land/x/ddc_vim@v5.0.1/types.ts";
 import {
   GatherArguments,
   GetPreviewerArguments,
   OnCompleteDoneArguments,
-} from "https://deno.land/x/ddc_vim@v4.3.1/base/source.ts";
+} from "https://deno.land/x/ddc_vim@v5.0.1/base/source.ts";
 import { Denops, op } from "../denippet/deps/denops.ts";
 import { splitLines } from "../denippet/util.ts";
 import { lsputil } from "../denippet/deps/lsp.ts";
