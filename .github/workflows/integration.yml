@@ -1,8 +1,5 @@
 name: integration
 
-env:
-  DENO_VERSION: 1.x
-
 on:
   workflow_dispatch:
   push:
@@ -37,6 +34,13 @@ jobs:
           - ubuntu-latest
           - windows-latest
           - macos-latest
+        deno_version:
+          - "1.43.x"
+          - "1.x"
+        host_version:
+          - vim: "v9.1.0399"
+            nvim: "v0.9.5"
+
     runs-on: ${{ matrix.runner }}
     steps:
       - name: Checkout this repo
@@ -53,15 +57,18 @@ jobs:
       - name: Setup deno
         uses: denoland/setup-deno@v1
         with:
-          deno-version: ${{ env.DENO_VERSION }}
+          deno-version: ${{ matrix.deno_version }}
 
       - name: Setup Vim
         uses: rhysd/action-setup-vim@v1
+        with:
+          version: ${{ matrix.host_version.vim }}
 
       - name: Setup Neovim
         uses: rhysd/action-setup-vim@v1
         with:
           neovim: true
+          version: ${{ matrix.host_version.nvim }}
 
       - name: Test
         run: deno task test
