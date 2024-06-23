@@ -139,7 +139,11 @@ export function main(denops: Denops): void {
         u.ensure(bodyU, is.UnionOf([is.String, is.ArrayOf(is.String)])),
       );
       const prefix = u.ensure(prefixU, is.OptionalOf(is.String));
-      if (await session.expand(body, prefix)) {
+      const hasJumpableNodes = await session.expand(body, prefix).catch((e) => {
+        echoerr(denops, e);
+        return false;
+      });
+      if (hasJumpableNodes) {
         const syncDelay = Number(await g.get(denops, "denippet_sync_delay"));
 
         await au.group(denops, "denippet-session", (helper) => {
@@ -184,7 +188,9 @@ export function main(denops: Denops): void {
         await forceUpdate(session.snippet.currentNode().tabstop);
       }
       session.guard();
-      await session.jump(dir);
+      await session.jump(dir).catch((e) => {
+        echoerr(denops, e);
+      });
       session.unguard();
       if (
         session.snippet?.currentNode().tabstop === 0 &&
@@ -234,12 +240,14 @@ export function main(denops: Denops): void {
       const id = u.ensure(idU, is.String);
       const { body, matched } = await searchSnippet(loader, id);
       if (body == null) {
-        throw new Error(`Unknown snippet id: ${id}`);
+        echoerr(denops, `Unknown snippet id: ${id}`);
+        return "";
       }
       const bodyStr = is.String(body) ? body : await body(denops, matched);
       const parsedBody = lsputil.parseSnippet(bodyStr);
       if (parsedBody === "") {
-        throw new Error(`Failed parsing: ${bodyStr}`);
+        echoerr(denops, `Failed parsing: ${bodyStr}`);
+        return "";
       }
       return parsedBody;
     },
