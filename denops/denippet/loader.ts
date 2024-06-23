@@ -60,7 +60,7 @@ export type NormalizedSnippet = {
   id: string;
   filetypes: string[];
   prefix: string[];
-  body: string | ((denops: Denops) => Promise<string>);
+  body: (denops: Denops) => string | Promise<string>;
   description: string;
   if?: ifKeyword | IfFunc;
   eval?: string;
@@ -162,7 +162,7 @@ export class Loader {
           id: this.getId(),
           filetypes: toArray(filetype),
           prefix: toArray(snip.prefix ?? name),
-          body: toString(snip.body),
+          body: () => toString(snip.body),
           description: toString(snip.description),
         }));
         this.set(snippets);
@@ -177,7 +177,7 @@ export class Loader {
             filetypes: ft,
             prefix: toArray(snippet.prefix ?? name),
             prefix_regexp: [],
-            body: toString(snippet.body),
+            body: () => toString(snippet.body),
             description: toString(snippet.description),
           };
         });

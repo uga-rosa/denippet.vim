@@ -104,7 +104,7 @@ export function main(denops: Denops): void {
         id: loader.getId(),
         filetypes,
         prefix,
-        body,
+        body: () => body,
         description: "",
       };
       loader.set([snippet]);
@@ -234,7 +234,7 @@ export function main(denops: Denops): void {
         echoerr(denops, `Unknown snippet id: ${id}`);
         return "";
       }
-      const bodyStr = is.String(body) ? body : await body(denops);
+      const bodyStr = await snippet.body(denops);
       const parsedBody = lsputil.parseSnippet(bodyStr);
       if (parsedBody === "") {
         echoerr(denops, `Failed parsing: ${bodyStr}`);
