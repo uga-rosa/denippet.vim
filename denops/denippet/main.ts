@@ -202,20 +202,24 @@ export function main(denops: Denops): void {
     },
 
     async getCompleteItems(): Promise<CompleteItem[]> {
-      return (await loader.get()).flatMap((snippet) =>
-        snippet.prefix.map((prefix) => ({
-          word: prefix,
-          kind: "Snippet",
-          dup: 1,
-          user_data: {
-            denippet: {
-              id: snippet.id,
-              body: typeof snippet.body == "string" ? snippet.body : "",
-              description: snippet.description ?? "",
+      const items: CompleteItem[] = [];
+      for (const snippet of await loader.get()) {
+        for (const prefix of snippet.prefix) {
+          items.push({
+            word: prefix,
+            kind: "Snippet",
+            dup: 1,
+            user_data: {
+              denippet: {
+                id: snippet.id,
+                body: await snippet.body(denops),
+                description: snippet.description ?? "",
+              },
             },
-          },
-        }))
-      );
+          });
+        }
+      }
+      return items;
     },
 
     snippetToString(bodyU: unknown): string {
@@ -229,8 +233,8 @@ export function main(denops: Denops): void {
 
     async snippetIdToString(idU: unknown): Promise<string> {
       const id = u.ensure(idU, is.String);
-      const { body } = await searchSnippet(loader, id);
-      if (body == null) {
+      const snippet = loader.getById(id);
+      if (snippet == null) {
         echoerr(denops, `Unknown snippet id: ${id}`);
         return "";
       }
