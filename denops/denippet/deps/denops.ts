@@ -1,4 +1,4 @@
-export type { Denops } from "https://deno.land/x/denops_std@v6.5.0/mod.ts";
+export type { Denops, Entrypoint } from "https://deno.land/x/denops_std@v6.5.0/mod.ts";
 export * as fn from "https://deno.land/x/denops_std@v6.5.0/function/mod.ts";
 export * as api from "https://deno.land/x/denops_std@v6.5.0/function/nvim/mod.ts";
 export * as vim from "https://deno.land/x/denops_std@v6.5.0/function/vim/mod.ts";

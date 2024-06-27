@@ -1,4 +1,4 @@
-import { au, Denops, fn, g, lambda } from "./deps/denops.ts";
+import { au, Denops, Entrypoint, fn, g, lambda } from "./deps/denops.ts";
 import { is, u } from "./deps/unknownutil.ts";
 import { lsputil } from "./deps/lsp.ts";
 import { Loader, NormalizedSnippet } from "./loader.ts";
@@ -52,7 +52,7 @@ async function searchSnippet(
   return bestMatch;
 }
 
-export function main(denops: Denops): void {
+export const main: Entrypoint = (denops) => {
   const session = new Session(denops);
   const loader = new Loader(denops);
 
@@ -266,4 +266,4 @@ export function main(denops: Denops): void {
       session.unguard();
     },
   };
-}
+};
